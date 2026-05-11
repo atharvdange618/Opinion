@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { SignOut } from "@/components/auth/SignOut";
@@ -23,9 +24,17 @@ export function GlobalNav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <Link
           href="/"
-          className="font-heading text-xl font-semibold tracking-tight"
+          className="flex h-10 items-center rounded-md px-1 transition-opacity hover:opacity-90"
         >
-          Opinion
+          <Image
+            src="/logo.svg"
+            alt="Opinion"
+            width={154}
+            height={40}
+            className="shrink-0"
+            style={{ width: "auto", height: "32px" }}
+            priority
+          />
         </Link>
 
         <nav className="flex items-center gap-2">
