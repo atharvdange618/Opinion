@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { SignOut } from "@/components/auth/SignOut";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -11,7 +12,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, BarChart3, Plus } from "lucide-react";
+import { BarChart3, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function GlobalNav() {
   const { isLoaded, isSignedIn, user } = useAuth();
@@ -66,12 +68,7 @@ export function GlobalNav() {
                       {user?.email}
                     </p>
                   </div>
-                  <DropdownMenuItem asChild>
-                    <a href="/api/auth/logout">
-                      <LogOut className="mr-2 size-4" />
-                      Sign out
-                    </a>
-                  </DropdownMenuItem>
+                  <SignOut />
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
