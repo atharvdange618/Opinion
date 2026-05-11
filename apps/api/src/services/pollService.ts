@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import mongoose from "mongoose";
-import { Poll, IPoll } from "../models/Poll.js";
+import { Poll } from "../models/Poll.js";
 import { Question } from "../models/Question.js";
 import { Response as ResponseModel } from "../models/Response.js";
 import { User } from "../models/User.js";

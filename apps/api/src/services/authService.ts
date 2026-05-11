@@ -1,5 +1,5 @@
 import { User, IUser } from "../models/User.js";
-import { NotFoundError, UnauthorizedError } from "../lib/errors.js";
+import { NotFoundError } from "../lib/errors.js";
 import type { AuthPayload } from "../middleware/auth.js";
 
 export async function syncUser(userInfo: AuthPayload): Promise<IUser> {

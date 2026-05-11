@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import { verifySessionJwt, type SessionUser } from "../services/oidcService.js";
+import { verifySessionJwt } from "../services/oidcService.js";
 
 let getKey: ReturnType<typeof createRemoteJWKSet> | null = null;
 

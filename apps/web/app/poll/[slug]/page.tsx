@@ -282,23 +282,6 @@ function PublishedResultsScreen({
   poll: PublicPoll;
   results: PublishedResults;
 }) {
-  const anonPercent =
-    results.totalResponses > 0
-      ? Math.round(
-          (results.questionSummaries.reduce(
-            (acc, q) =>
-              acc +
-              q.options.reduce(
-                (optAcc, opt) => optAcc + (opt.option ? 0 : 0),
-                0,
-              ),
-            0,
-          ) /
-            results.totalResponses) *
-            100,
-        ) || 0
-      : 0;
-
   return (
     <div className="space-y-10">
       <div className="flex flex-col items-center text-center">

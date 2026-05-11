@@ -44,13 +44,6 @@ function formatHoursAgo(hours: number): string {
   return days === 1 ? "1 day ago" : `${days} days ago`;
 }
 
-function formatHoursShort(hours: number): string {
-  if (hours < 1) return "< 1h";
-  if (hours < 24) return `${Math.round(hours)}h`;
-  const days = Math.floor(hours / 24);
-  return days === 1 ? "1 day" : `${days} days`;
-}
-
 export default function AnalyticsPage({
   params,
 }: {
