@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useRef } from "react";
+import { use, useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,19 @@ import {
   submitResponseSchema,
   type SubmitResponseInput,
 } from "@opinion/shared";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { LogIn, Users, ShieldAlert, ShieldCheck } from "lucide-react";
+import { SuccessArt } from "@/components/illustrations/SuccessArt";
+import { ResultsArt } from "@/components/illustrations/ResultsArt";
 
 interface PublicPoll {
   _id: string;
@@ -45,6 +58,326 @@ interface PublishedResults {
   }[];
 }
 
+function QuestionCard({
+  question,
+  index,
+  register,
+  errors,
+}: {
+  question: PublicPoll["questions"][0];
+  index: number;
+  register: any;
+  errors: any;
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+
+  return (
+    <Card className="border-border/60 bg-card">
+      <CardHeader className="pb-4">
+        <div className="flex items-start gap-3">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-medium text-primary">
+            {index + 1}
+          </span>
+          <CardTitle className="font-heading text-base leading-snug">
+            {question.text}
+            {question.isMandatory && (
+              <span className="ml-1 text-destructive">*</span>
+            )}
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <RadioGroup
+          onValueChange={(value) => {
+            setSelected(value);
+            const event = {
+              target: {
+                value,
+                name: `answers.${index}.selectedOption`,
+              },
+            };
+            (
+              register(`answers.${index}.selectedOption`, {
+                required: question.isMandatory,
+              }).onChange as any
+            )(event);
+          }}
+          value={selected ?? undefined}
+        >
+          <div className="space-y-2">
+            {question.options.map((option, oIndex) => (
+              <label
+                key={oIndex}
+                className={`group/option flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-all ${
+                  selected === option
+                    ? "border-primary/30 bg-primary/5 ring-1 ring-primary/20"
+                    : "border-border/60 hover:border-border"
+                }`}
+              >
+                <RadioGroupItem value={option} className="sr-only" />
+                <span
+                  className={`size-4 shrink-0 rounded-full border-2 transition-all ${
+                    selected === option
+                      ? "border-primary bg-primary"
+                      : "border-muted-foreground/30"
+                  }`}
+                />
+                <span
+                  className={`text-sm transition-all ${
+                    selected === option ? "font-medium" : "text-foreground"
+                  }`}
+                >
+                  {option}
+                </span>
+              </label>
+            ))}
+          </div>
+        </RadioGroup>
+        {errors.answers?.[index]?.selectedOption && (
+          <p className="mt-3 text-sm text-destructive">
+            Please select an option
+          </p>
+        )}
+        <input
+          type="hidden"
+          defaultValue={question._id}
+          {...register(`answers.${index}.questionId`)}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+function VotingForm({
+  poll,
+  onSubmit,
+  isSubmitting,
+  error,
+}: {
+  poll: PublicPoll;
+  onSubmit: (data: SubmitResponseInput) => void;
+  isSubmitting: boolean;
+  error: string | null;
+}) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SubmitResponseInput>({
+    resolver: zodResolver(submitResponseSchema),
+  });
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {poll.questions.map((question, index) => (
+        <QuestionCard
+          key={question._id}
+          question={question}
+          index={index}
+          register={register}
+          errors={errors}
+        />
+      ))}
+
+      {poll.responseMode === "anonymous" && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <ShieldAlert className="size-3.5" />
+          <span>Anonymous response — your identity is not recorded</span>
+        </div>
+      )}
+
+      {error && (
+        <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {error}
+        </p>
+      )}
+
+      <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
+        {isSubmitting ? "Submitting..." : "Submit responses"}
+      </Button>
+    </form>
+  );
+}
+
+function ThankYouScreen() {
+  return (
+    <div className="flex flex-col items-center py-16 text-center">
+      <SuccessArt />
+      <h2 className="mt-8 font-heading text-2xl font-semibold">
+        Response recorded
+      </h2>
+      <p className="mt-2 max-w-sm text-muted-foreground">
+        Thank you for participating. Your feedback helps shape better decisions.
+      </p>
+    </div>
+  );
+}
+
+function AuthRequiredScreen({ slug }: { slug: string }) {
+  return (
+    <div className="flex flex-col items-center py-16 text-center">
+      <div className="mb-6 rounded-full bg-primary/10 p-6">
+        <ShieldCheck className="size-12 text-primary" />
+      </div>
+      <h2 className="font-heading text-2xl font-semibold">Sign in required</h2>
+      <p className="mt-2 max-w-sm text-muted-foreground">
+        This poll is restricted to authenticated users only. Sign in to
+        participate.
+      </p>
+      <Button className="mt-6" asChild>
+        <a href={`/api/auth/login?redirect=/poll/${slug}`}>
+          <LogIn className="mr-2 size-4" />
+          Sign in to respond
+        </a>
+      </Button>
+    </div>
+  );
+}
+
+function ExpiredScreen({ title }: { title: string }) {
+  return (
+    <div className="flex flex-col items-center py-16 text-center">
+      <div className="mb-6 rounded-full bg-muted p-6">
+        <span className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          Closed
+        </span>
+      </div>
+      <h2 className="font-heading text-2xl font-semibold">{title}</h2>
+      <p className="mt-2 max-w-sm text-muted-foreground">
+        This poll has ended and is no longer accepting responses.
+      </p>
+    </div>
+  );
+}
+
+function PublishedResultsScreen({
+  poll,
+  results,
+}: {
+  poll: PublicPoll;
+  results: PublishedResults;
+}) {
+  const anonPercent =
+    results.totalResponses > 0
+      ? Math.round(
+          (results.questionSummaries.reduce(
+            (acc, q) =>
+              acc +
+              q.options.reduce(
+                (optAcc, opt) =>
+                  optAcc +
+                  (opt.option ? 0 : 0),
+                0,
+              ),
+            0,
+          ) /
+            results.totalResponses) *
+            100,
+        ) || 0
+      : 0;
+
+  return (
+    <div className="space-y-10">
+      <div className="flex flex-col items-center text-center">
+        <ResultsArt />
+        <h1 className="mt-6 font-heading text-3xl font-semibold tracking-tight">
+          {poll.title}
+        </h1>
+        {poll.description && (
+          <p className="mt-2 max-w-md text-muted-foreground">
+            {poll.description}
+          </p>
+        )}
+        <div className="mt-4 flex items-center gap-4 font-mono text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Users className="size-3.5" />
+            {results.totalResponses} responses
+          </span>
+        </div>
+      </div>
+
+      <div className="space-y-8">
+        {results.questionSummaries.map((summary) => {
+          const winner = summary.options.reduce((a, b) =>
+            a.count > b.count ? a : b,
+          );
+          const winnerPercent =
+            summary.totalAnswers > 0
+              ? Math.round((winner.count / summary.totalAnswers) * 100)
+              : 0;
+
+          return (
+            <Card key={summary.questionId} className="border-border/60 bg-card">
+              <CardHeader className="border-b border-border/40 pb-4">
+                <CardTitle className="font-heading text-xl leading-snug">
+                  {summary.questionText}
+                </CardTitle>
+                <div className="mt-2 flex items-center gap-3 font-mono text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <Users className="size-3.5" />
+                    {summary.totalAnswers} answers
+                  </span>
+                  <span className="text-muted-foreground/50">/</span>
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="size-3.5 text-success" />
+                    {winner.option} leading at {winnerPercent}%
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={summary.options}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <XAxis
+                        dataKey="option"
+                        tick={{
+                          fill: "currentColor",
+                          opacity: 0.5,
+                          fontSize: 12,
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                        dy={10}
+                      />
+                      <YAxis
+                        tick={{
+                          fill: "currentColor",
+                          opacity: 0.5,
+                          fontSize: 12,
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                        dx={-10}
+                      />
+                      <Tooltip
+                        cursor={{ fill: "var(--color-primary)", opacity: 0.05 }}
+                        contentStyle={{
+                          borderRadius: "12px",
+                          border: "1px solid var(--color-border)",
+                          backgroundColor: "var(--color-card)",
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill="var(--color-primary)"
+                        radius={[6, 6, 0, 0]}
+                        maxBarSize={60}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function PublicPollPage({
   params,
 }: {
@@ -52,8 +385,9 @@ export default function PublicPollPage({
 }) {
   const { slug } = use(params);
   const { isSignedIn } = useAuth();
-  const submitted = useRef(false);
   const queryClient = useQueryClient();
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = "Poll - Opinion";
@@ -78,206 +412,140 @@ export default function PublicPollPage({
     enabled: poll?.status === "published",
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SubmitResponseInput>({
-    resolver: zodResolver(submitResponseSchema),
-  });
-
   const submitMutation = useMutation({
     mutationFn: async (data: SubmitResponseInput) => {
       await api.post(`/polls/public/${slug}/respond`, data);
     },
     onSuccess: () => {
-      submitted.current = true;
+      setSubmitted(true);
       queryClient.invalidateQueries({ queryKey: ["public-poll", slug] });
+    },
+    onError: (err: any) => {
+      setSubmitError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to submit. Please try again.",
+      );
     },
   });
 
   if (pollLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Loading&hellip;</p>
+      <div className="mx-auto max-w-2xl px-4 py-12">
+        <Skeleton className="mb-4 h-10 w-64" />
+        <Skeleton className="mb-8 h-4 w-96" />
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-48 rounded-xl" />
+          ))}
+        </div>
+        <Skeleton className="mt-6 h-12 w-full rounded-xl" />
       </div>
     );
   }
 
   if (!poll) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Poll not found</p>
+      <div className="flex flex-col items-center py-16 text-center">
+        <div className="mb-6 rounded-full bg-muted p-6">
+          <span className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            Not Found
+          </span>
+        </div>
+        <h2 className="font-heading text-2xl font-semibold">Poll not found</h2>
+        <p className="mt-2 max-w-sm text-muted-foreground">
+          This poll doesn&apos;t exist or has been removed.
+        </p>
       </div>
     );
   }
 
   if (poll.status === "expired") {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold">{poll.title}</h1>
-          <p className="mt-2 text-zinc-500">This poll has ended.</p>
-        </div>
+      <div className="mx-auto max-w-2xl px-4 py-12">
+        <ExpiredScreen title={poll.title} />
       </div>
     );
   }
 
   if (poll.status === "published" && results) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <h1 className="mb-2 text-2xl font-semibold">{poll.title}</h1>
-        <p className="mb-6 text-zinc-500">
-          {results.totalResponses} total responses
-        </p>
-
-        <div className="space-y-8">
-          {results.questionSummaries.map((summary) => (
-            <div
-              key={summary.questionId}
-              className="rounded-lg border border-zinc-200 p-6"
-            >
-              <h3 className="mb-4 text-lg font-semibold">
-                {summary.questionText}
-                <span className="ml-2 text-sm font-normal text-zinc-500">
-                  ({summary.totalAnswers} answers)
-                </span>
-              </h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={summary.options}>
-                    <XAxis dataKey="option" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-4 space-y-1">
-                {summary.options.map((opt) => (
-                  <div
-                    key={opt.option}
-                    className="flex justify-between text-sm"
-                  >
-                    <span>{opt.option}</span>
-                    <span className="text-zinc-500">
-                      {opt.count} ({opt.percentage}%)
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <PublishedResultsScreen poll={poll} results={results} />
       </div>
     );
   }
 
   if (poll.status !== "active") {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">This poll is not accepting responses.</p>
+      <div className="flex flex-col items-center py-16 text-center">
+        <h2 className="font-heading text-2xl font-semibold">
+          Poll not accepting responses
+        </h2>
+        <p className="mt-2 max-w-sm text-muted-foreground">
+          This poll is currently not accepting responses.
+        </p>
       </div>
     );
   }
 
   if (poll.responseMode === "authenticated" && !isSignedIn) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="mb-2 text-2xl font-semibold">{poll.title}</h1>
-          <p className="mb-6 text-zinc-500">
-            This poll requires you to sign in first.
-          </p>
-          <a
-            href={`/api/auth/login?redirect=/poll/${slug}`}
-            className="inline-block rounded-lg bg-zinc-950 px-6 py-3 text-white"
-          >
-            Sign in to respond
-          </a>
-        </div>
+      <div className="mx-auto max-w-2xl px-4 py-12">
+        <AuthRequiredScreen slug={slug} />
       </div>
     );
   }
 
-  if (submitted.current) {
+  if (submitted) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold">Thank you!</h1>
-          <p className="mt-2 text-zinc-500">Your response has been recorded.</p>
-        </div>
+      <div className="mx-auto max-w-2xl px-4 py-12">
+        <ThankYouScreen />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-2 text-2xl font-semibold">{poll.title}</h1>
-      {poll.description && (
-        <p className="mb-6 text-zinc-500">{poll.description}</p>
-      )}
-
-      <form
-        onSubmit={handleSubmit((data) => submitMutation.mutate(data))}
-        className="space-y-6"
-      >
-        {poll.questions.map((question, qIndex) => (
-          <div
-            key={question._id}
-            className="rounded-lg border border-zinc-200 p-4"
-          >
-            <p className="mb-3 font-medium">
-              {question.text}
-              {question.isMandatory && (
-                <span className="ml-1 text-red-500">*</span>
-              )}
-            </p>
-
-            <div className="space-y-2">
-              {question.options.map((option, oIndex) => (
-                <label
-                  key={oIndex}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-200 p-3 hover:bg-zinc-50"
-                >
-                  <input
-                    type="radio"
-                    value={option}
-                    {...register(`answers.${qIndex}.selectedOption`, {
-                      required: question.isMandatory,
-                    })}
-                    name={`answers.${qIndex}.selectedOption`}
-                    className="size-4"
-                  />
-                  <span className="text-sm">{option}</span>
-                </label>
-              ))}
-            </div>
-
-            <input
-              type="hidden"
-              defaultValue={question._id}
-              {...register(`answers.${qIndex}.questionId`)}
-            />
-          </div>
-        ))}
-
-        <button
-          type="submit"
-          disabled={submitMutation.isPending}
-          className="w-full rounded-lg bg-zinc-950 py-3 text-white disabled:opacity-50"
-        >
-          {submitMutation.isPending ? "Submitting&hellip;" : "Submit responses"}
-        </button>
-
-        {submitMutation.isError && (
-          <p className="text-center text-sm text-red-500">
-            {(submitMutation.error as any)?.response?.data?.message ||
-              submitMutation.error?.message ||
-              "Failed to submit. Please try again."}
-          </p>
+    <div className="mx-auto max-w-2xl px-4 py-12">
+      <div className="mb-8">
+        <h1 className="font-heading text-3xl font-semibold tracking-tight">
+          {poll.title}
+        </h1>
+        {poll.description && (
+          <p className="mt-2 text-muted-foreground">{poll.description}</p>
         )}
-      </form>
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Users className="size-3.5" />
+            {poll.questions.length} question{poll.questions.length !== 1 ? "s" : ""}
+          </span>
+          <span className="text-muted-foreground/50">·</span>
+          <span
+            className={`flex items-center gap-1.5 ${
+              poll.responseMode === "anonymous"
+                ? "text-success"
+                : "text-muted-foreground"
+            }`}
+          >
+            {poll.responseMode === "anonymous" ? (
+              <ShieldAlert className="size-3.5" />
+            ) : (
+              <ShieldCheck className="size-3.5" />
+            )}
+            {poll.responseMode}
+          </span>
+        </div>
+      </div>
+
+      <VotingForm
+        poll={poll}
+        onSubmit={(data) => {
+          setSubmitError(null);
+          submitMutation.mutate(data);
+        }}
+        isSubmitting={submitMutation.isPending}
+        error={submitError}
+      />
     </div>
   );
 }
