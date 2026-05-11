@@ -30,8 +30,8 @@ export default async function HomePage() {
                 <span className="text-primary">Get honest answers.</span>
               </h1>
               <p className="mt-6 animate-slide-up max-w-lg text-lg leading-relaxed text-muted-foreground [animation-delay:200ms] [animation-fill-mode:backwards]">
-                Create polls, share them with a link, and watch responses come in
-                live. Anonymous or authenticated — you decide who can answer.
+                Create polls, share them with a link, and watch responses come
+                in live. Anonymous or authenticated - you decide who can answer.
               </p>
               <div className="mt-8 flex animate-slide-up flex-wrap items-center gap-4 [animation-delay:300ms] [animation-fill-mode:backwards]">
                 <Button size="lg" asChild>

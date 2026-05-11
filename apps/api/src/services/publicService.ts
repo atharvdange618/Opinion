@@ -66,6 +66,8 @@ export async function getPublicPoll(slug: string) {
     responseMode: poll.responseMode,
     status: poll.status,
     slug: poll.slug,
+    expiresAt: poll.expiresAt.toISOString(),
+    createdAt: poll.createdAt.toISOString(),
     questions: safeQuestions,
   };
 }
