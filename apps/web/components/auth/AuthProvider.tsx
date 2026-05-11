@@ -22,14 +22,22 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({
+  children,
+  hasSession = false,
+}: {
+  children: React.ReactNode;
+  hasSession?: boolean;
+}) {
   const [state, setState] = useState<AuthContextValue>({
-    isLoaded: false,
+    isLoaded: !hasSession,
     isSignedIn: false,
     user: null,
   });
 
   useEffect(() => {
+    if (!hasSession) return;
+
     api
       .get<User>("/auth/me")
       .then(({ data }) => {
@@ -38,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .catch(() => {
         setState({ isLoaded: true, isSignedIn: false, user: null });
       });
-  }, []);
+  }, [hasSession]);
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
 }
