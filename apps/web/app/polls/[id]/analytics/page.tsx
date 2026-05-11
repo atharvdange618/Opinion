@@ -14,12 +14,7 @@ import {
 } from "@/components/Charts";
 import type { AnalyticsData } from "@opinion/shared";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
@@ -157,11 +152,13 @@ export default function AnalyticsPage({
   const peakTime =
     peakHour !== null
       ? `${HOURS[peakHour]}${peakDay !== null ? " on " + DAYS[peakDay] : ""}`
-      : "—";
+      : "-";
 
   const totalQuestions = analytics?.questionSummaries.length ?? 0;
   const maxVotes = analytics?.pollHealth.votesPerQuestion
-    ? Math.max(...analytics.pollHealth.votesPerQuestion.map((q) => q.totalAnswers))
+    ? Math.max(
+        ...analytics.pollHealth.votesPerQuestion.map((q) => q.totalAnswers),
+      )
     : 0;
 
   return (
@@ -261,7 +258,7 @@ export default function AnalyticsPage({
           </CardHeader>
           <CardContent>
             <p className="font-heading text-3xl font-bold tabular-nums">
-              {analytics?.pollHealth.pollDuration ?? "—"}
+              {analytics?.pollHealth.pollDuration ?? "-"}
             </p>
             <p className="mt-1 font-mono text-xs text-muted-foreground">
               active window
@@ -312,7 +309,9 @@ export default function AnalyticsPage({
                   {maxVotes > 0
                     ? Math.round(
                         ((maxVotes -
-                          (analytics?.pollHealth.votesPerQuestion?.[totalQuestions - 1]?.totalAnswers ?? 0)) /
+                          (analytics?.pollHealth.votesPerQuestion?.[
+                            totalQuestions - 1
+                          ]?.totalAnswers ?? 0)) /
                           maxVotes) *
                           100,
                       )
@@ -347,10 +346,7 @@ export default function AnalyticsPage({
               : 0;
 
           return (
-            <Card
-              key={summary.questionId}
-              className="border-border/60 bg-card"
-            >
+            <Card key={summary.questionId} className="border-border/60 bg-card">
               <CardHeader className="border-b border-border/40 pb-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <CardTitle className="font-heading text-xl leading-snug">
@@ -403,8 +399,7 @@ export default function AnalyticsPage({
                           borderRadius: "12px",
                           border: "1px solid var(--color-border)",
                           backgroundColor: "var(--color-card)",
-                          boxShadow:
-                            "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                          boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
                         }}
                       />
                       <Bar
@@ -464,8 +459,7 @@ export default function AnalyticsPage({
                       borderRadius: "12px",
                       border: "1px solid var(--color-border)",
                       backgroundColor: "var(--color-card)",
-                      boxShadow:
-                        "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                      boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
                     }}
                   />
                   <Bar

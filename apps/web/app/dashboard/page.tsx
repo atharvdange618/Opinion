@@ -80,9 +80,9 @@ export default function DashboardPage() {
             </span>
           </CardHeader>
           <CardContent>
-            <p className="font-heading text-3xl font-bold tabular-nums">
+            <div className="font-heading text-3xl font-bold tabular-nums">
               {isLoading ? <Skeleton className="h-8 w-12" /> : stats.total}
-            </p>
+            </div>
           </CardContent>
         </Card>
         <Card className="border-border/60 bg-card">
@@ -93,9 +93,9 @@ export default function DashboardPage() {
             <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="font-heading text-3xl font-bold tabular-nums">
+            <div className="font-heading text-3xl font-bold tabular-nums">
               {isLoading ? <Skeleton className="h-8 w-16" /> : stats.responses}
-            </p>
+            </div>
           </CardContent>
         </Card>
         <Card className="border-border/60 bg-card">
@@ -108,9 +108,9 @@ export default function DashboardPage() {
             </span>
           </CardHeader>
           <CardContent>
-            <p className="font-heading text-3xl font-bold tabular-nums">
+            <div className="font-heading text-3xl font-bold tabular-nums">
               {isLoading ? <Skeleton className="h-8 w-10" /> : stats.active}
-            </p>
+            </div>
           </CardContent>
         </Card>
       </div>

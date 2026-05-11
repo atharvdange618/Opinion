@@ -38,8 +38,8 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Last updated: May 2025. We believe in complete transparency about how
-            we handle your data.
+            Last updated: May 2025. We believe in complete transparency about
+            how we handle your data.
           </p>
         </header>
 
@@ -55,17 +55,17 @@ export default function PrivacyPage() {
                 </h2>
               </div>
               <p className="mb-4 text-base leading-relaxed text-foreground">
-                When you sign in using your identity provider, we receive your basic
-                profile information including your <strong>name</strong> and{" "}
-                <strong>email address</strong>. This information is used strictly to
-                identify you within our platform and associate your account with the
-                polls you create.
+                When you sign in using your identity provider, we receive your
+                basic profile information including your <strong>name</strong>{" "}
+                and <strong>email address</strong>. This information is used
+                strictly to identify you within our platform and associate your
+                account with the polls you create.
               </p>
               <p className="text-base leading-relaxed text-foreground">
-                Poll responses may be collected anonymously or with authentication
-                depending on the creator&apos;s configuration. We adhere to a strict{" "}
-                <strong>no-sale policy</strong> — your data is never sold to or shared
-                with third-party advertisers.
+                Poll responses may be collected anonymously or with
+                authentication depending on the creator&apos;s configuration. We
+                adhere to a strict <strong>no-sale policy</strong> - your data
+                is never sold to or shared with third-party advertisers.
               </p>
             </section>
 
@@ -89,7 +89,10 @@ export default function PrivacyPage() {
                   "Generate and display accurate poll analytics and results",
                   "Monitor platform health and improve user experience",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-base text-foreground">
+                  <li
+                    key={i}
+                    className="flex items-start gap-3 text-base text-foreground"
+                  >
                     <span className="mt-2 size-1.5 rounded-full bg-primary" />
                     {item}
                   </li>
@@ -108,10 +111,11 @@ export default function PrivacyPage() {
               </div>
               <p className="text-base leading-relaxed text-foreground">
                 We employ industry-standard security measures to protect your
-                information. Your data is stored securely in encrypted databases.
-                We retain your information only for as long as your account remains
-                active. You maintain the right to request a complete deletion of your
-                personal data at any time by contacting our support team.
+                information. Your data is stored securely in encrypted
+                databases. We retain your information only for as long as your
+                account remains active. You maintain the right to request a
+                complete deletion of your personal data at any time by
+                contacting our support team.
               </p>
             </section>
 
@@ -125,11 +129,11 @@ export default function PrivacyPage() {
                 </h2>
               </div>
               <p className="text-base leading-relaxed text-foreground">
-                Opinion respects your digital footprint. We use a single, strictly
-                necessary session cookie to maintain your authenticated state while
-                using the application. We proudly operate without invasive tracking
-                cookies, third-party analytics pixels, or cross-site tracking
-                mechanisms.
+                Opinion respects your digital footprint. We use a single,
+                strictly necessary session cookie to maintain your authenticated
+                state while using the application. We proudly operate without
+                invasive tracking cookies, third-party analytics pixels, or
+                cross-site tracking mechanisms.
               </p>
             </section>
 
@@ -143,9 +147,10 @@ export default function PrivacyPage() {
                 </h2>
               </div>
               <p className="text-base leading-relaxed text-foreground">
-                If you have any concerns about our privacy practices, data handling,
-                or wish to exercise your privacy rights, please reach out directly
-                through our GitHub repository issues page. We&apos;re here to help.
+                If you have any concerns about our privacy practices, data
+                handling, or wish to exercise your privacy rights, please reach
+                out directly through our GitHub repository issues page.
+                We&apos;re here to help.
               </p>
             </section>
           </article>
