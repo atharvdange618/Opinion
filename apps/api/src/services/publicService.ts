@@ -13,6 +13,26 @@ import {
 } from "../lib/errors.js";
 import type { AuthPayload } from "../middleware/auth.js";
 
+const TURNSTILE_VERIFY_URL =
+  "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+
+async function verifyTurnstileToken(token: string): Promise<boolean> {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+  if (!secretKey) return false;
+
+  try {
+    const res = await fetch(TURNSTILE_VERIFY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret: secretKey, response: token }),
+    });
+    const data = (await res.json()) as { success: boolean };
+    return data.success;
+  } catch {
+    return false;
+  }
+}
+
 function hashFingerprint(ip: string): string {
   const salt = process.env.FINGERPRINT_SALT || "default-salt";
   return crypto
@@ -119,6 +139,7 @@ export async function getPublicResults(slug: string) {
 export async function submitResponse(
   slug: string,
   answers: { questionId: string; selectedOption: string }[],
+  turnstileToken: string | undefined,
   req: Request,
   userInfo?: AuthPayload,
 ) {
@@ -166,6 +187,10 @@ export async function submitResponse(
   }
 
   if (poll.responseMode === "anonymous") {
+    if (!turnstileToken || !(await verifyTurnstileToken(turnstileToken))) {
+      throw new BadRequestError("Security check failed. Please try again.");
+    }
+
     const ip = getClientIp(req);
     const fingerprint = hashFingerprint(ip);
 

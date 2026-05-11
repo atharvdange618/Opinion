@@ -30,6 +30,7 @@ import {
   Clock,
   Calendar,
 } from "lucide-react";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { SuccessArt } from "@/components/illustrations/SuccessArt";
 import { ResultsArt } from "@/components/illustrations/ResultsArt";
 
@@ -163,6 +164,10 @@ function VotingForm({
   isSubmitting: boolean;
   error: string | null;
 }) {
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(
+    undefined,
+  );
+
   const {
     register,
     handleSubmit,
@@ -172,7 +177,12 @@ function VotingForm({
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      onSubmit={handleSubmit((data) =>
+        onSubmit({ ...data, turnstileToken }),
+      )}
+      className="space-y-6"
+    >
       {poll.questions.map((question, index) => (
         <QuestionCard
           key={question._id}
@@ -184,9 +194,15 @@ function VotingForm({
       ))}
 
       {poll.responseMode === "anonymous" && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <ShieldAlert className="size-3.5" />
-          <span>Anonymous response - your identity is not recorded</span>
+        <div className="space-y-3">
+          <TurnstileWidget
+            onVerify={setTurnstileToken}
+            onExpire={() => setTurnstileToken(undefined)}
+          />
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldAlert className="size-3.5" />
+            <span>Anonymous response - your identity is not recorded</span>
+          </div>
         </div>
       )}
 
@@ -198,7 +214,7 @@ function VotingForm({
 
       <Button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || (poll.responseMode === "anonymous" && !turnstileToken)}
         className="w-full"
         size="lg"
       >

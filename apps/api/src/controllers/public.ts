@@ -28,6 +28,7 @@ export async function submitResponse(
     await publicService.submitResponse(
       req.params.slug as string,
       req.body.answers,
+      req.body.turnstileToken,
       req,
       req.user || undefined,
     );
