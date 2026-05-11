@@ -58,7 +58,6 @@ export interface AnalyticsData {
 export interface EngagementStats {
   firstResponseAt: string | null;
   lastResponseAt: string | null;
-  responseVelocity: number;
   peakActivity: {
     hour: number | null;
     dayOfWeek: number | null;
@@ -67,10 +66,18 @@ export interface EngagementStats {
 }
 
 export interface PollHealthStats {
-  completionRate: number;
-  avgResponsesPerHour: number;
+  pollDuration: string;
+  pollDurationHours: number;
   hoursSinceCreation: number;
-  statusAge: string;
+  votesPerQuestion: VotesPerQuestion[];
+}
+
+export interface VotesPerQuestion {
+  questionId: string;
+  questionText: string;
+  totalAnswers: number;
+  isMandatory: boolean;
+  dropOff: number;
 }
 
 export interface QuestionSummary {

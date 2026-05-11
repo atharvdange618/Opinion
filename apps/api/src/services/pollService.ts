@@ -234,9 +234,9 @@ export async function getAnalytics(
   const engagement = computeEngagementStats(allResponses, poll.createdAt);
   const pollHealth = computePollHealth(
     totalResponses,
-    allResponses.length,
+    allResponses,
+    questions,
     poll.createdAt,
-    poll.status,
   );
 
   return {
@@ -260,7 +260,6 @@ function computeEngagementStats(
     return {
       firstResponseAt: null,
       lastResponseAt: null,
-      responseVelocity: 0,
       peakActivity: { hour: null, dayOfWeek: null },
       uniqueRespondents: 0,
     };
@@ -294,16 +293,9 @@ function computeEngagementStats(
     b[1] > a[1] ? b : a,
   )[0];
 
-  const hoursSinceFirst =
-    (sortedResponses[0].createdAt.getTime() - pollCreatedAt.getTime()) /
-    (1000 * 60 * 60);
-  const responseVelocity =
-    hoursSinceFirst > 0 ? Math.round(responses.length / hoursSinceFirst) : 0;
-
   return {
     firstResponseAt,
     lastResponseAt,
-    responseVelocity,
     peakActivity: {
       hour: peakHour,
       dayOfWeek: peakDay,
@@ -314,32 +306,58 @@ function computeEngagementStats(
 
 function computePollHealth(
   totalResponses: number,
-  responsesWithData: number,
+  responses: InstanceType<typeof ResponseModel>[],
+  questions: InstanceType<typeof Question>[],
   pollCreatedAt: Date,
-  status: string,
 ): PollHealthStats {
   const hoursSinceCreation = Math.round(
     (Date.now() - pollCreatedAt.getTime()) / (1000 * 60 * 60),
   );
 
-  const avgResponsesPerHour =
-    hoursSinceCreation > 0
-      ? Math.round((totalResponses / hoursSinceCreation) * 10) / 10
-      : 0;
+  const pollDurationHours = Math.round(
+    responses.length > 0
+      ? (responses[responses.length - 1].createdAt.getTime() -
+          responses[0].createdAt.getTime()) /
+          (1000 * 60 * 60)
+      : 0,
+  );
 
-  let statusAge = "new";
-  if (status === "active" && hoursSinceCreation > 1) {
-    statusAge = "hot";
-  } else if (status === "expired" || status === "published") {
-    statusAge = status;
+  let pollDuration = "No responses yet";
+  if (pollDurationHours >= 24) {
+    const days = Math.round(pollDurationHours / 24);
+    pollDuration = days === 1 ? "1 day" : `${days} days`;
+  } else if (pollDurationHours >= 1) {
+    pollDuration = `${pollDurationHours}h`;
+  } else if (responses.length > 0) {
+    pollDuration = "< 1h";
   }
 
-  const completionRate = 0;
+  const votesPerQuestion = questions.map((q) => {
+    const questionVotes = responses.filter((r) =>
+      r.question.equals(q._id),
+    ).length;
+    const maxVotes = questions.length > 0
+      ? Math.max(...questions.map((qq) =>
+          responses.filter((r) => r.question.equals(qq._id)).length,
+        ))
+      : 0;
+    const dropOff = maxVotes > 0
+      ? Math.round(((maxVotes - questionVotes) / maxVotes) * 100)
+      : 0;
+
+    return {
+      questionId: q._id.toString(),
+      questionText: q.text,
+      totalAnswers: questionVotes,
+      isMandatory: q.isMandatory,
+      dropOff,
+    };
+  });
 
   return {
-    completionRate,
-    avgResponsesPerHour,
+    pollDuration,
+    pollDurationHours,
     hoursSinceCreation,
-    statusAge,
+    votesPerQuestion,
   };
 }

@@ -31,10 +31,9 @@ import {
   ShieldCheck,
   Clock,
   ExternalLink,
-  Zap,
   Activity,
-  TrendingUp,
   Calendar,
+  TrendingDown,
 } from "lucide-react";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -43,27 +42,18 @@ const HOURS = Array.from({ length: 24 }, (_, i) => {
   return i < 12 ? `${h}AM` : `${h}PM`;
 });
 
-function formatRelativeTime(isoString: string | null): string {
-  if (!isoString) return "—";
-  const date = new Date(isoString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
 function formatHoursAgo(hours: number): string {
-  if (hours < 1) return "<1h ago";
+  if (hours < 1) return "< 1h ago";
   if (hours < 24) return `${Math.round(hours)}h ago`;
   const days = Math.floor(hours / 24);
   return days === 1 ? "1 day ago" : `${days} days ago`;
+}
+
+function formatHoursShort(hours: number): string {
+  if (hours < 1) return "< 1h";
+  if (hours < 24) return `${Math.round(hours)}h`;
+  const days = Math.floor(hours / 24);
+  return days === 1 ? "1 day" : `${days} days`;
 }
 
 export default function AnalyticsPage({
@@ -169,6 +159,11 @@ export default function AnalyticsPage({
       ? `${HOURS[peakHour]}${peakDay !== null ? " on " + DAYS[peakDay] : ""}`
       : "—";
 
+  const totalQuestions = analytics?.questionSummaries.length ?? 0;
+  const maxVotes = analytics?.pollHealth.votesPerQuestion
+    ? Math.max(...analytics.pollHealth.votesPerQuestion.map((q) => q.totalAnswers))
+    : 0;
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
@@ -260,35 +255,16 @@ export default function AnalyticsPage({
         <Card className="border-border/60 bg-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Response Velocity
+              Poll Duration
             </CardTitle>
-            <Zap className="size-4 text-muted-foreground" />
+            <Clock className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="font-heading text-3xl font-bold tabular-nums">
-              {analytics?.engagement.responseVelocity ?? 0}
-              <span className="ml-1 text-base font-normal text-muted-foreground">
-                /hr
-              </span>
+              {analytics?.pollHealth.pollDuration ?? "—"}
             </p>
             <p className="mt-1 font-mono text-xs text-muted-foreground">
-              avg responses/hour
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              First Response
-            </CardTitle>
-            <TrendingUp className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-heading text-xl font-bold">
-              {formatRelativeTime(analytics?.engagement.firstResponseAt ?? null)}
-            </p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              after poll creation
+              active window
             </p>
           </CardContent>
         </Card>
@@ -319,6 +295,42 @@ export default function AnalyticsPage({
             </p>
             <p className="mt-1 font-mono text-xs text-muted-foreground">
               {analytics?.totalResponses ?? 0} responses gathered
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60 bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Drop-off Rate
+            </CardTitle>
+            <TrendingDown className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="font-heading text-3xl font-bold tabular-nums">
+              {totalQuestions > 1 ? (
+                <>
+                  {maxVotes > 0
+                    ? Math.round(
+                        ((maxVotes -
+                          (analytics?.pollHealth.votesPerQuestion?.[totalQuestions - 1]?.totalAnswers ?? 0)) /
+                          maxVotes) *
+                          100,
+                      )
+                    : 0}
+                  <span className="ml-1 text-base font-normal text-muted-foreground">
+                    %
+                  </span>
+                </>
+              ) : (
+                <span className="text-base font-normal text-muted-foreground">
+                  N/A
+                </span>
+              )}
+            </p>
+            <p className="mt-1 font-mono text-xs text-muted-foreground">
+              {totalQuestions > 1
+                ? `${analytics?.pollHealth.votesPerQuestion?.[0]?.totalAnswers ?? 0} → ${analytics?.pollHealth.votesPerQuestion?.[totalQuestions - 1]?.totalAnswers ?? 0} (Q1 → Q${totalQuestions})`
+                : "single question"}
             </p>
           </CardContent>
         </Card>
