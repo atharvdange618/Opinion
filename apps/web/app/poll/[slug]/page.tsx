@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { LogIn, Users, ShieldAlert, ShieldCheck } from "lucide-react";
 import { SuccessArt } from "@/components/illustrations/SuccessArt";
 import { ResultsArt } from "@/components/illustrations/ResultsArt";
@@ -69,7 +68,9 @@ function QuestionCard({
   register: any;
   errors: any;
 }) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | undefined>(undefined);
+
+  const isSelected = (option: string) => selected === option;
 
   return (
     <Card className="border-border/60 bg-card">
@@ -102,14 +103,13 @@ function QuestionCard({
               }).onChange as any
             )(event);
           }}
-          value={selected ?? undefined}
         >
           <div className="space-y-2">
             {question.options.map((option, oIndex) => (
               <label
                 key={oIndex}
                 className={`group/option flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-all ${
-                  selected === option
+                  isSelected(option)
                     ? "border-primary/30 bg-primary/5 ring-1 ring-primary/20"
                     : "border-border/60 hover:border-border"
                 }`}
@@ -117,14 +117,14 @@ function QuestionCard({
                 <RadioGroupItem value={option} className="sr-only" />
                 <span
                   className={`size-4 shrink-0 rounded-full border-2 transition-all ${
-                    selected === option
+                    isSelected(option)
                       ? "border-primary bg-primary"
                       : "border-muted-foreground/30"
                   }`}
                 />
                 <span
                   className={`text-sm transition-all ${
-                    selected === option ? "font-medium" : "text-foreground"
+                    isSelected(option) ? "font-medium" : "text-foreground"
                   }`}
                 >
                   {option}
