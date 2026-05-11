@@ -4,7 +4,9 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Terms of Service - Opinion",
+  title: "Terms of Service",
+  description:
+    "Opinion's terms of service. By using Opinion you agree to these terms covering acceptable use, content ownership, and liability limitations.",
 };
 
 const sections = [
@@ -45,8 +47,8 @@ export default function TermsPage() {
             Terms of Service
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            The rules of the road. Please read these terms carefully before using
-            Opinion.
+            The rules of the road. Please read these terms carefully before
+            using Opinion.
           </p>
         </header>
 
@@ -62,10 +64,10 @@ export default function TermsPage() {
                 </h2>
               </div>
               <p className="text-base leading-relaxed text-foreground">
-                By accessing and using Opinion, you acknowledge that you have read,
-                understood, and agree to be bound by these Terms of Service. If you
-                do not agree with any part of these terms, you must discontinue your
-                use of our platform immediately.
+                By accessing and using Opinion, you acknowledge that you have
+                read, understood, and agree to be bound by these Terms of
+                Service. If you do not agree with any part of these terms, you
+                must discontinue your use of our platform immediately.
               </p>
             </section>
 
@@ -79,13 +81,16 @@ export default function TermsPage() {
                 </h2>
               </div>
               <p className="mb-4 text-base leading-relaxed text-foreground">
-                Opinion empowers you to create, distribute, and analyze polls. To
-                maintain a safe environment, you agree{" "}
-                <strong>not</strong> to use the service for:
+                Opinion empowers you to create, distribute, and analyze polls.
+                To maintain a safe environment, you agree <strong>not</strong>{" "}
+                to use the service for:
               </p>
               <ul className="mb-4 space-y-3">
                 {prohibitedUses.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-base text-foreground">
+                  <li
+                    key={i}
+                    className="flex items-start gap-3 text-base text-foreground"
+                  >
                     <span className="mt-2 size-1.5 rounded-full bg-primary" />
                     {item}
                   </li>
@@ -103,12 +108,12 @@ export default function TermsPage() {
                 </h2>
               </div>
               <p className="text-base leading-relaxed text-foreground">
-                You retain full ownership of all polls, questions, and content you
-                create on the platform. However, by publishing a poll, you grant
-                Opinion a worldwide, royalty-free license to host, display, and
-                distribute that content strictly for the purpose of operating the
-                service. You are solely responsible for ensuring you have the right
-                to publish your content.
+                You retain full ownership of all polls, questions, and content
+                you create on the platform. However, by publishing a poll, you
+                grant Opinion a worldwide, royalty-free license to host,
+                display, and distribute that content strictly for the purpose of
+                operating the service. You are solely responsible for ensuring
+                you have the right to publish your content.
               </p>
             </section>
 
@@ -124,11 +129,12 @@ export default function TermsPage() {
               <p className="text-base leading-relaxed text-foreground">
                 Opinion is provided on an{" "}
                 <span className="italic">&ldquo;as is&rdquo;</span> and{" "}
-                <span className="italic">&ldquo;as available&rdquo;</span> basis without
-                any warranties, express or implied. We do not guarantee uninterrupted
-                access or perfectly accurate analytics. In no event shall Opinion or
-                its maintainers be held liable for any direct, indirect, incidental,
-                or consequential damages resulting from your use of the platform.
+                <span className="italic">&ldquo;as available&rdquo;</span> basis
+                without any warranties, express or implied. We do not guarantee
+                uninterrupted access or perfectly accurate analytics. In no
+                event shall Opinion or its maintainers be held liable for any
+                direct, indirect, incidental, or consequential damages resulting
+                from your use of the platform.
               </p>
             </section>
 
@@ -142,10 +148,10 @@ export default function TermsPage() {
                 </h2>
               </div>
               <p className="text-base leading-relaxed text-foreground">
-                We reserve the right to update or modify these Terms of Service at
-                any time. Significant changes will be communicated through the
-                platform. Your continued use of Opinion following any updates
-                constitutes your acceptance of the revised terms.
+                We reserve the right to update or modify these Terms of Service
+                at any time. Significant changes will be communicated through
+                the platform. Your continued use of Opinion following any
+                updates constitutes your acceptance of the revised terms.
               </p>
             </section>
           </article>

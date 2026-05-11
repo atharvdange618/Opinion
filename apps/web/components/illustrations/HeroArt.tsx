@@ -49,7 +49,11 @@ const CustomTooltip = ({
 
 export function HeroArt() {
   return (
-    <div className="w-full max-w-md rounded-2xl border border-border/60 bg-card/60 backdrop-blur-2xl p-6 shadow-xl ring-1 ring-foreground/5">
+    <div
+      role="img"
+      aria-label="Live poll results bar chart showing Svelte leading with 62 votes, followed by React with 48, Vue with 31, Solid with 27, and Angular with 19."
+      className="w-full max-w-md rounded-2xl border border-border/60 bg-card/60 backdrop-blur-2xl p-6 shadow-xl ring-1 ring-foreground/5"
+    >
       <p className="mb-1 text-xs font-medium uppercase tracking-widest text-muted-foreground">
         Live results
       </p>

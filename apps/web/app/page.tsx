@@ -33,6 +33,15 @@ export default async function HomePage() {
                 Create polls, share them with a link, and watch responses come
                 in live. Anonymous or authenticated - you decide who can answer.
               </p>
+              <p className="mt-4 animate-slide-up max-w-lg text-base leading-relaxed text-muted-foreground [animation-delay:250ms] [animation-fill-mode:backwards]">
+                Opinion is a free, real-time polling platform built for teams,
+                creators, educators, and communities. Each poll comes with a
+                live analytics dashboard, anti-spam protection powered by
+                Cloudflare Turnstile, and duplicate vote prevention. Set an
+                expiry date, choose between anonymous or authenticated
+                responses, and watch results update in real-time as people
+                participate.
+              </p>
               <div className="mt-8 flex animate-slide-up flex-wrap items-center gap-4 [animation-delay:300ms] [animation-fill-mode:backwards]">
                 <Button size="lg" asChild>
                   <Link

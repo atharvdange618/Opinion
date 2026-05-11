@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 
@@ -10,6 +11,10 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    document.title = "Error - Opinion";
+  }, []);
+
   return (
     <div className="flex items-center justify-center py-24">
       <div className="text-center">
@@ -52,10 +57,7 @@ export default function ErrorPage({
             rx="3"
             className="fill-destructive/20"
           />
-          <path
-            d="M100 10 L110 30 L90 30 Z"
-            className="fill-warning/50"
-          />
+          <path d="M100 10 L110 30 L90 30 Z" className="fill-warning/50" />
         </svg>
         <h1 className="mt-6 font-heading text-3xl font-semibold">
           Something went wrong

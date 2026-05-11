@@ -4,7 +4,9 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - Opinion",
+  title: "Privacy Policy",
+  description:
+    "Opinion's privacy policy. Learn how we collect, use, and protect your data. We never sell your information and use only essential cookies.",
 };
 
 const sections = [

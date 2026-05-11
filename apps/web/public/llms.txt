@@ -1,0 +1,19 @@
+# Opinion - Create & Share Polls
+> Create polls, collect anonymous or verified feedback, and analyze responses in real-time.
+
+## About
+Opinion is a free online polling platform that lets you create polls, share them with a single link, and collect responses - anonymously or with authentication. It includes live analytics dashboards, anti-spam protection via Cloudflare Turnstile, and real-time collaboration.
+
+## Key Features
+- Anonymous or authenticated polling modes
+- Live analytics with per-question breakdowns
+- Real-time collaboration via Socket.io
+- Anti-spam protection (Cloudflare Turnstile + fingerprinting)
+- Shareable poll links
+- Auto-expiry for polls with countdown timer
+- Duplicate vote prevention
+
+## Pages
+- Home: https://opinion.atharvdangedev.in
+- Privacy Policy: https://opinion.atharvdangedev.in/privacy
+- Terms of Service: https://opinion.atharvdangedev.in/terms
