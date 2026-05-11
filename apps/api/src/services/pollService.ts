@@ -6,7 +6,7 @@ import { Response as ResponseModel } from "../models/Response.js";
 import { User } from "../models/User.js";
 import { BadRequestError, NotFoundError } from "../lib/errors.js";
 import type { AuthPayload } from "../middleware/auth.js";
-import type { AnalyticsData } from "@opinion/shared";
+import type { AnalyticsData, EngagementStats, PollHealthStats } from "@opinion/shared";
 
 async function getUserBySub(userInfo: AuthPayload) {
   const user = await User.findOne({ sub: userInfo.sub });
@@ -231,6 +231,14 @@ export async function getAnalytics(
     respondent: { $ne: null },
   });
 
+  const engagement = computeEngagementStats(allResponses, poll.createdAt);
+  const pollHealth = computePollHealth(
+    totalResponses,
+    allResponses.length,
+    poll.createdAt,
+    poll.status,
+  );
+
   return {
     totalResponses,
     questionSummaries,
@@ -239,5 +247,99 @@ export async function getAnalytics(
       anonymous: anonymousCount,
       authenticated: authenticatedCount,
     },
+    engagement,
+    pollHealth,
+  };
+}
+
+function computeEngagementStats(
+  responses: InstanceType<typeof ResponseModel>[],
+  pollCreatedAt: Date,
+): EngagementStats {
+  if (responses.length === 0) {
+    return {
+      firstResponseAt: null,
+      lastResponseAt: null,
+      responseVelocity: 0,
+      peakActivity: { hour: null, dayOfWeek: null },
+      uniqueRespondents: 0,
+    };
+  }
+
+  const sortedResponses = [...responses].sort(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+
+  const firstResponseAt = sortedResponses[0].createdAt.toISOString();
+  const lastResponseAt = sortedResponses[sortedResponses.length - 1].createdAt.toISOString();
+
+  const uniqueRespondents = new Set(
+    responses.map((r) => r.respondentId || r._id.toString()),
+  ).size;
+
+  const hourCounts = new Map<number, number>();
+  const dayCounts = new Map<number, number>();
+
+  responses.forEach((r) => {
+    const hour = r.createdAt.getHours();
+    const day = r.createdAt.getDay();
+    hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
+    dayCounts.set(day, (dayCounts.get(day) || 0) + 1);
+  });
+
+  const peakHour = [...hourCounts.entries()].reduce((a, b) =>
+    b[1] > a[1] ? b : a,
+  )[0];
+  const peakDay = [...dayCounts.entries()].reduce((a, b) =>
+    b[1] > a[1] ? b : a,
+  )[0];
+
+  const hoursSinceFirst =
+    (sortedResponses[0].createdAt.getTime() - pollCreatedAt.getTime()) /
+    (1000 * 60 * 60);
+  const responseVelocity =
+    hoursSinceFirst > 0 ? Math.round(responses.length / hoursSinceFirst) : 0;
+
+  return {
+    firstResponseAt,
+    lastResponseAt,
+    responseVelocity,
+    peakActivity: {
+      hour: peakHour,
+      dayOfWeek: peakDay,
+    },
+    uniqueRespondents,
+  };
+}
+
+function computePollHealth(
+  totalResponses: number,
+  responsesWithData: number,
+  pollCreatedAt: Date,
+  status: string,
+): PollHealthStats {
+  const hoursSinceCreation = Math.round(
+    (Date.now() - pollCreatedAt.getTime()) / (1000 * 60 * 60),
+  );
+
+  const avgResponsesPerHour =
+    hoursSinceCreation > 0
+      ? Math.round((totalResponses / hoursSinceCreation) * 10) / 10
+      : 0;
+
+  let statusAge = "new";
+  if (status === "active" && hoursSinceCreation > 1) {
+    statusAge = "hot";
+  } else if (status === "expired" || status === "published") {
+    statusAge = status;
+  }
+
+  const completionRate = 0;
+
+  return {
+    completionRate,
+    avgResponsesPerHour,
+    hoursSinceCreation,
+    statusAge,
   };
 }

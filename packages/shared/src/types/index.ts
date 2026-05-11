@@ -51,6 +51,26 @@ export interface AnalyticsData {
     anonymous: number;
     authenticated: number;
   };
+  engagement: EngagementStats;
+  pollHealth: PollHealthStats;
+}
+
+export interface EngagementStats {
+  firstResponseAt: string | null;
+  lastResponseAt: string | null;
+  responseVelocity: number;
+  peakActivity: {
+    hour: number | null;
+    dayOfWeek: number | null;
+  };
+  uniqueRespondents: number;
+}
+
+export interface PollHealthStats {
+  completionRate: number;
+  avgResponsesPerHour: number;
+  hoursSinceCreation: number;
+  statusAge: string;
 }
 
 export interface QuestionSummary {

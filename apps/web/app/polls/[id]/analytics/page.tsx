@@ -31,7 +31,40 @@ import {
   ShieldCheck,
   Clock,
   ExternalLink,
+  Zap,
+  Activity,
+  TrendingUp,
+  Calendar,
 } from "lucide-react";
+
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const HOURS = Array.from({ length: 24 }, (_, i) => {
+  const h = i % 12 || 12;
+  return i < 12 ? `${h}AM` : `${h}PM`;
+});
+
+function formatRelativeTime(isoString: string | null): string {
+  if (!isoString) return "—";
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function formatHoursAgo(hours: number): string {
+  if (hours < 1) return "<1h ago";
+  if (hours < 24) return `${Math.round(hours)}h ago`;
+  const days = Math.floor(hours / 24);
+  return days === 1 ? "1 day ago" : `${days} days ago`;
+}
 
 export default function AnalyticsPage({
   params,
@@ -129,6 +162,13 @@ export default function AnalyticsPage({
       : 0;
   const authPercent = 100 - anonPercent;
 
+  const peakHour = analytics?.engagement.peakActivity.hour ?? null;
+  const peakDay = analytics?.engagement.peakActivity.dayOfWeek ?? null;
+  const peakTime =
+    peakHour !== null
+      ? `${HOURS[peakHour]}${peakDay !== null ? " on " + DAYS[peakDay] : ""}`
+      : "—";
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
@@ -168,7 +208,7 @@ export default function AnalyticsPage({
         </div>
       </div>
 
-      <div className="mb-10 grid gap-6 sm:grid-cols-3">
+      <div className="mb-8 grid gap-6 sm:grid-cols-3">
         <Card className="border-border/60 bg-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -211,6 +251,74 @@ export default function AnalyticsPage({
             </p>
             <p className="mt-1 font-mono text-xs text-muted-foreground">
               {authPercent}% of responses
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-border/60 bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Response Velocity
+            </CardTitle>
+            <Zap className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="font-heading text-3xl font-bold tabular-nums">
+              {analytics?.engagement.responseVelocity ?? 0}
+              <span className="ml-1 text-base font-normal text-muted-foreground">
+                /hr
+              </span>
+            </p>
+            <p className="mt-1 font-mono text-xs text-muted-foreground">
+              avg responses/hour
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60 bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              First Response
+            </CardTitle>
+            <TrendingUp className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="font-heading text-xl font-bold">
+              {formatRelativeTime(analytics?.engagement.firstResponseAt ?? null)}
+            </p>
+            <p className="mt-1 font-mono text-xs text-muted-foreground">
+              after poll creation
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60 bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Peak Activity
+            </CardTitle>
+            <Activity className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="font-heading text-xl font-bold">{peakTime}</p>
+            <p className="mt-1 font-mono text-xs text-muted-foreground">
+              busiest time window
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60 bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Created
+            </CardTitle>
+            <Calendar className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="font-heading text-xl font-bold">
+              {formatHoursAgo(analytics?.pollHealth.hoursSinceCreation ?? 0)}
+            </p>
+            <p className="mt-1 font-mono text-xs text-muted-foreground">
+              {analytics?.totalResponses ?? 0} responses gathered
             </p>
           </CardContent>
         </Card>
