@@ -1,0 +1,33 @@
+{
+  "name": "@opinion/web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.0.2",
+    "@opinion/shared": "workspace:*",
+    "@tanstack/react-query": "^5.75.5",
+    "axios": "^1.9.0",
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-hook-form": "^7.56.2",
+    "react-icons": "^5.5.0",
+    "recharts": "^2.15.3",
+    "socket.io-client": "^4.8.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.6",
+    "@types/node": "^25.6.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "tailwindcss": "^4.1.6",
+    "typescript": "^5.8.3"
+  }
+}
