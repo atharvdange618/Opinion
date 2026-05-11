@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 
 export function GlobalFooter() {
   return (
@@ -10,14 +10,7 @@ export function GlobalFooter() {
             href="/"
             className="flex h-9 items-center rounded-md px-1 transition-opacity hover:opacity-90"
           >
-            <Image
-              src="/logo.svg"
-              alt="Opinion"
-              width={135}
-              height={36}
-              className="shrink-0"
-              style={{ width: "auto", height: "28px" }}
-            />
+            <BrandLogo className="h-7" />
           </Link>
           <span className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()}

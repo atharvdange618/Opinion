@@ -3,15 +3,13 @@ import type { NextRequest } from "next/server";
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "opinion_session";
 
-const publicRoutes = [
-  "/",
-  "/api",
-  "/poll",
-  "/socket.io",
-];
+const publicRoutes = ["/", "/api", "/poll", "/socket.io"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isStaticAsset = /\.[^/]+$/.test(pathname);
+
+  if (isStaticAsset) return NextResponse.next();
 
   const isPublic = publicRoutes.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
@@ -30,5 +28,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|static|favicon.ico).*)"],
+  matcher: ["/((?!_next|.*\\..*).*)"],
 };

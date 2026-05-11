@@ -1,20 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { SignOut } from "@/components/auth/SignOut";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BarChart3, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 export function GlobalNav() {
   const { isLoaded, isSignedIn, user } = useAuth();
@@ -26,15 +24,7 @@ export function GlobalNav() {
           href="/"
           className="flex h-10 items-center rounded-md px-1 transition-opacity hover:opacity-90"
         >
-          <Image
-            src="/logo.svg"
-            alt="Opinion"
-            width={154}
-            height={40}
-            className="shrink-0"
-            style={{ width: "auto", height: "32px" }}
-            priority
-          />
+          <BrandLogo className="h-8" />
         </Link>
 
         <nav className="flex items-center gap-2">
