@@ -24,14 +24,20 @@ export function GlobalFooter() {
           </span>
         </div>
         <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-          <Link href="/privacy" className="hover:text-foreground transition-colors">
+          <Link
+            href="/privacy"
+            className="hover:text-foreground transition-colors"
+          >
             Privacy
           </Link>
-          <Link href="/terms" className="hover:text-foreground transition-colors">
+          <Link
+            href="/terms"
+            className="hover:text-foreground transition-colors"
+          >
             Terms
           </Link>
           <a
-            href="https://github.com/anomalyco/opencode"
+            href="https://github.com/atharvdange618/Opinion"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-foreground transition-colors"
