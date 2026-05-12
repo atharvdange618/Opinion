@@ -3,11 +3,15 @@ import { initiateLogin, completeAuth, buildLogoutUrl } from "../services/oidcSer
 import { syncUser } from "../services/authService.js";
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "opinion_session";
+const FRONTEND_URL = process.env.PUBLIC_FRONTEND_URL || "http://localhost:3000";
 
 const router = Router();
 
 router.get("/login", async (req, res) => {
-  const redirectTo = (req.query.redirect as string) || "/dashboard";
+  let redirectTo = (req.query.redirect as string) || "/dashboard";
+  if (!redirectTo.startsWith("http")) {
+    redirectTo = `${FRONTEND_URL}${redirectTo.startsWith("/") ? "" : "/"}${redirectTo}`;
+  }
   const { authorizeUrl } = await initiateLogin(redirectTo);
   res.redirect(authorizeUrl);
 });
@@ -16,7 +20,7 @@ router.get("/callback", async (req, res) => {
   const { code, state } = req.query;
 
   if (typeof code !== "string" || typeof state !== "string") {
-    res.redirect("/?error=missing_params");
+    res.redirect(`${FRONTEND_URL}/?error=missing_params`);
     return;
   }
 
@@ -36,7 +40,7 @@ router.get("/callback", async (req, res) => {
     res.redirect(redirectTo);
   } catch (err) {
     console.error("Auth callback failed:", err);
-    res.redirect("/?error=auth_failed");
+    res.redirect(`${FRONTEND_URL}/?error=auth_failed`);
   }
 });
 

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 export function CTA({ hasSession }: { hasSession: boolean }) {
   const { ref, inView } = useInView({ threshold: 0.3 });
 
@@ -35,7 +37,7 @@ export function CTA({ hasSession }: { hasSession: boolean }) {
                 href={
                   hasSession
                     ? "/polls/create"
-                    : "/api/auth/login?prompt=create"
+                    : `${API_URL}/api/auth/login?redirect=${encodeURIComponent("/polls/create")}`
                 }
               >
                 Create your first poll

@@ -3,10 +3,12 @@
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 export function SignOut() {
   async function handleSignOut() {
     try {
-      const res = await fetch("/api/auth/logout", { method: "POST" });
+      const res = await fetch(`${API_URL}/api/auth/logout`, { method: "POST", credentials: "include" });
       const { logoutUrl } = await res.json();
       window.location.href = logoutUrl || "/";
     } catch {

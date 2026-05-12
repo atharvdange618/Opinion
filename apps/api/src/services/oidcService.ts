@@ -6,6 +6,7 @@ const IDP_URL = process.env.KLEIS_IDP_URL!;
 const CLIENT_ID = process.env.KLEIS_CLIENT_ID!;
 const CLIENT_SECRET = process.env.KLEIS_CLIENT_SECRET!;
 const APP_URL = process.env.PUBLIC_APP_URL!;
+const FRONTEND_URL = process.env.PUBLIC_FRONTEND_URL!;
 const SESSION_SECRET = new TextEncoder().encode(process.env.SESSION_SECRET!);
 const SESSION_DURATION = 7 * 24 * 60 * 60;
 
@@ -108,5 +109,5 @@ export async function verifySessionJwt(
 }
 
 export function buildLogoutUrl(): string {
-  return `${IDP_URL}/auth/logout?client_id=${CLIENT_ID}&post_logout_redirect_uri=${encodeURIComponent(APP_URL)}`;
+  return `${IDP_URL}/auth/logout?client_id=${CLIENT_ID}&post_logout_redirect_uri=${encodeURIComponent(FRONTEND_URL)}`;
 }

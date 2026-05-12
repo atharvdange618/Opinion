@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { createServer } from "http";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
@@ -18,6 +19,12 @@ const httpServer = createServer(app);
 const io = setupSocket(httpServer);
 setIO(io);
 
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    credentials: true,
+  }),
+);
 app.use(helmet());
 app.use(hpp());
 app.use(express.json());

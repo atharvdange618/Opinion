@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "opinion_session";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
@@ -48,7 +49,7 @@ export default async function HomePage() {
                     href={
                       session
                         ? "/polls/create"
-                        : "/api/auth/login?prompt=create"
+                        : `${API_URL}/api/auth/login?redirect=${encodeURIComponent("https://opinion.atharvdangedev.in/polls/create")}`
                     }
                   >
                     Create your first poll
@@ -56,7 +57,7 @@ export default async function HomePage() {
                   </Link>
                 </Button>
                 <Button variant="ghost" size="lg" asChild>
-                  <Link href={session ? "/dashboard" : "/api/auth/login"}>
+                  <Link href={session ? "/dashboard" : `${API_URL}/api/auth/login`}>
                     {session ? "Go to dashboard" : "Sign in"}
                   </Link>
                 </Button>

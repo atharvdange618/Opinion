@@ -5,6 +5,8 @@ import { useInView } from "@/hooks/useInView";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 export function AnimatedCTA({ hasSession }: { hasSession: boolean }) {
   const { ref, inView } = useInView({ threshold: 0.3 });
 
@@ -24,13 +26,13 @@ export function AnimatedCTA({ hasSession }: { hasSession: boolean }) {
         </p>
         <div className="mt-8">
           <Button size="lg" asChild>
-            <Link
-              href={
-                hasSession
-                  ? "/polls/create"
-                  : "/api/auth/login?prompt=create"
-              }
-            >
+              <Link
+                href={
+                  hasSession
+                    ? "/polls/create"
+                    : `${API_URL}/api/auth/login?redirect=${encodeURIComponent("/polls/create")}`
+                }
+              >
               Create your first poll
               <ArrowRight className="ml-2 size-4" />
             </Link>

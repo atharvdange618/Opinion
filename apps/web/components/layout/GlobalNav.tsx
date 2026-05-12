@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { BarChart3, Plus } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 export function GlobalNav() {
   const { isLoaded, isSignedIn, user } = useAuth();
 
@@ -75,10 +77,10 @@ export function GlobalNav() {
             <>
               <ThemeToggle />
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/api/auth/login">Sign in</Link>
+                <Link href={`${API_URL}/api/auth/login`}>Sign in</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/api/auth/login?prompt=create">Get started</Link>
+                <Link href={`${API_URL}/api/auth/login?redirect=${encodeURIComponent("/polls/create")}`}>Get started</Link>
               </Button>
             </>
           )}
