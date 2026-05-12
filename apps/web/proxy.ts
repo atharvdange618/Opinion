@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "opinion_session";
 
-const publicRoutes = ["/", "/api", "/poll", "/socket.io"];
+const publicRoutes = ["/", "/api", "/poll", "/privacy", "/terms", "/socket.io"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
