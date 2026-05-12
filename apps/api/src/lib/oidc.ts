@@ -1,19 +1,9 @@
 import crypto from "crypto";
+import { SignJWT, jwtVerify } from "jose";
 
-interface PkceSession {
-  codeVerifier: string;
-  redirectTo: string;
-  expiresAt: number;
-}
-
-const sessions = new Map<string, PkceSession>();
-
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, s] of sessions) {
-    if (s.expiresAt < now) sessions.delete(key);
-  }
-}, 10 * 60 * 1000);
+const STATE_SECRET = new TextEncoder().encode(
+  process.env.SESSION_SECRET || "fallback-secret-not-for-production",
+);
 
 export function generateCodeVerifier(): string {
   return crypto.randomBytes(32).toString("base64url");
@@ -23,31 +13,32 @@ export function generateCodeChallenge(verifier: string): string {
   return crypto.createHash("sha256").update(verifier).digest("base64url");
 }
 
-export function generateState(): string {
-  return crypto.randomBytes(16).toString("hex");
-}
-
-export function createPkceSession(
+export async function createPkceSession(
   redirectTo: string,
-): { state: string; codeVerifier: string; codeChallenge: string } {
+): Promise<{ state: string; codeVerifier: string; codeChallenge: string }> {
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
-  const state = generateState();
 
-  sessions.set(state, {
-    codeVerifier,
-    redirectTo,
-    expiresAt: Date.now() + 10 * 60 * 1000,
-  });
+  const state = await new SignJWT({ codeVerifier, redirectTo })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("10m")
+    .sign(STATE_SECRET);
 
   return { state, codeVerifier, codeChallenge };
 }
 
-export function consumePkceSession(
+export async function consumePkceSession(
   state: string,
-): { codeVerifier: string; redirectTo: string } | null {
-  const session = sessions.get(state);
-  if (!session) return null;
-  sessions.delete(state);
-  return { codeVerifier: session.codeVerifier, redirectTo: session.redirectTo };
+): Promise<{ codeVerifier: string; redirectTo: string } | null> {
+  try {
+    const { payload } = await jwtVerify(state, STATE_SECRET, {
+      algorithms: ["HS256"],
+    });
+    return {
+      codeVerifier: payload.codeVerifier as string,
+      redirectTo: payload.redirectTo as string,
+    };
+  } catch {
+    return null;
+  }
 }

@@ -16,10 +16,10 @@ export interface SessionUser {
   picture?: string;
 }
 
-export function initiateLogin(
+export async function initiateLogin(
   redirectTo: string,
-): { authorizeUrl: string; state: string } {
-  const { state, codeChallenge } = createPkceSession(redirectTo);
+): Promise<{ authorizeUrl: string; state: string }> {
+  const { state, codeChallenge } = await createPkceSession(redirectTo);
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: `${APP_URL}/api/auth/callback`,
@@ -37,7 +37,7 @@ export async function completeAuth(
   code: string,
   state: string,
 ): Promise<{ user: SessionUser; sessionJwt: string; redirectTo: string }> {
-  const pkce = consumePkceSession(state);
+  const pkce = await consumePkceSession(state);
   if (!pkce) throw new BadRequestError("Invalid or expired state parameter");
 
   const tokenRes = await fetch(`${IDP_URL}/token`, {

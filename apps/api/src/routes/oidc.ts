@@ -6,9 +6,9 @@ const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "opinion_session";
 
 const router = Router();
 
-router.get("/login", (req, res) => {
+router.get("/login", async (req, res) => {
   const redirectTo = (req.query.redirect as string) || "/dashboard";
-  const { authorizeUrl } = initiateLogin(redirectTo);
+  const { authorizeUrl } = await initiateLogin(redirectTo);
   res.redirect(authorizeUrl);
 });
 
