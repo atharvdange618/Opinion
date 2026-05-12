@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { initiateLogin, completeAuth, buildLogoutUrl } from "../services/oidcService.js";
+import {
+  initiateLogin,
+  completeAuth,
+  buildLogoutUrl,
+} from "../services/oidcService.js";
 import { syncUser } from "../services/authService.js";
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "opinion_session";
@@ -35,7 +39,9 @@ router.get("/callback", async (req, res) => {
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
-      ...(process.env.NODE_ENV === "production" && { domain: ".atharvdangedev.in" }),
+      ...(process.env.NODE_ENV === "production" && {
+        domain: ".atharvdangedev.in",
+      }),
     });
 
     res.redirect(redirectTo);
@@ -46,7 +52,12 @@ router.get("/callback", async (req, res) => {
 });
 
 router.post("/logout", (_req, res) => {
-  res.clearCookie(SESSION_COOKIE, { path: "/" });
+  res.clearCookie(SESSION_COOKIE, {
+    path: "/",
+    ...(process.env.NODE_ENV === "production" && {
+      domain: ".atharvdangedev.in",
+    }),
+  });
   res.json({ logoutUrl: buildLogoutUrl() });
 });
 
