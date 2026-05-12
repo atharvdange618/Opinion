@@ -231,9 +231,8 @@ export async function getAnalytics(
     respondent: { $ne: null },
   });
 
-  const engagement = computeEngagementStats(allResponses, poll.createdAt);
+  const engagement = computeEngagementStats(allResponses);
   const pollHealth = computePollHealth(
-    totalResponses,
     allResponses,
     questions,
     poll.createdAt,
@@ -254,7 +253,6 @@ export async function getAnalytics(
 
 function computeEngagementStats(
   responses: InstanceType<typeof ResponseModel>[],
-  pollCreatedAt: Date,
 ): EngagementStats {
   if (responses.length === 0) {
     return {
@@ -305,7 +303,6 @@ function computeEngagementStats(
 }
 
 function computePollHealth(
-  totalResponses: number,
   responses: InstanceType<typeof ResponseModel>[],
   questions: InstanceType<typeof Question>[],
   pollCreatedAt: Date,

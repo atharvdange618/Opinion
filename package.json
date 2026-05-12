@@ -9,7 +9,8 @@
     "dev": "pnpm run dev:api & pnpm run dev:web",
     "build:api": "pnpm --filter @opinion/api build",
     "build:web": "pnpm --filter @opinion/web build",
-    "build": "pnpm run build:api && pnpm run build:web"
+    "build:shared": "pnpm --filter @opinion/shared build",
+    "build": "pnpm run build:shared && pnpm run build:api && pnpm run build:web"
   },
   "packageManager": "pnpm@10.32.1",
   "pnpm": {
