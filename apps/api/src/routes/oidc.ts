@@ -35,6 +35,7 @@ router.get("/callback", async (req, res) => {
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
+      ...(process.env.NODE_ENV === "production" && { domain: ".atharvdangedev.in" }),
     });
 
     res.redirect(redirectTo);

@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "opinion_session";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const APP_URL = process.env.PUBLIC_APP_URL || "http://localhost:3000";
 
-const publicRoutes = ["/", "/api", "/poll", "/privacy", "/terms", "/socket.io"];
+const publicRoutes = ["/", "/poll", "/privacy", "/terms"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -19,8 +21,8 @@ export function proxy(request: NextRequest) {
 
   const sessionCookie = request.cookies.get(SESSION_COOKIE)?.value;
   if (!sessionCookie) {
-    const url = new URL("/api/auth/login", request.url);
-    url.searchParams.set("redirect", pathname);
+    const url = new URL(`${API_URL}/api/auth/login`);
+    url.searchParams.set("redirect", `${APP_URL}${pathname}`);
     return NextResponse.redirect(url);
   }
 

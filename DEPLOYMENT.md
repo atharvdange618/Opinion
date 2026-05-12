@@ -290,12 +290,12 @@ pm2 restart ecosystem.config.js
 
 ## Troubleshooting
 
-| Symptom                     | Cause & Fix                                                                                          |
-| --------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `502 Bad Gateway`           | PM2 not running. Run `pm2 start ecosystem.config.js`                                                |
-| CORS errors in browser      | Check `CORS_ORIGIN` in API `.env` — must be `https://opinion.atharvdangedev.in`                     |
-| Auth callback fails         | Check Kleiss client config — redirect URI must be `https://api-opinion.atharvdangedev.in/api/auth/callback` |
-| Socket.io not connecting    | `NEXT_PUBLIC_API_URL` must be `https://api-opinion.atharvdangedev.in` in web `.env.local`           |
-| Session not persisting      | Cookie `SameSite=None` requires HTTPS. Both subdomains must have valid SSL certificates              |
-| `pnpm: command not found`   | Run `corepack enable && corepack prepare pnpm@10.32.1 --activate` as the site user                  |
-| Login redirects to wrong place | Check `PUBLIC_FRONTEND_URL` in API `.env` — must be `https://opinion.atharvdangedev.in`            |
+| Symptom                        | Cause & Fix                                                                                                 |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `502 Bad Gateway`              | PM2 not running. Run `pm2 start ecosystem.config.js`                                                        |
+| CORS errors in browser         | Check `CORS_ORIGIN` in API `.env` — must be `https://opinion.atharvdangedev.in`                             |
+| Auth callback fails            | Check Kleiss client config — redirect URI must be `https://api-opinion.atharvdangedev.in/api/auth/callback` |
+| Socket.io not connecting       | `NEXT_PUBLIC_API_URL` must be `https://api-opinion.atharvdangedev.in` in web `.env.local`                   |
+| Session not persisting         | Cookie `SameSite=None` requires HTTPS. Both subdomains must have valid SSL certificates                     |
+| `pnpm: command not found`      | Run `corepack enable && corepack prepare pnpm@10.32.1 --activate` as the site user                          |
+| Login redirects to wrong place | Check `PUBLIC_FRONTEND_URL` in API `.env` — must be `https://opinion.atharvdangedev.in`                     |
