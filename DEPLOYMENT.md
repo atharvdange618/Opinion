@@ -152,7 +152,7 @@ Replace your single `location /` block with two location blocks:
 ```nginx
 # API and WebSocket -> Express server
 location /api/ {
-    proxy_pass http://127.0.0.1:3001/;
+    proxy_pass http://127.0.0.1:3001;
     proxy_http_version 1.1;
     proxy_set_header X-Forwarded-Host $host;
     proxy_set_header X-Forwarded-Server $host;
