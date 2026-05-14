@@ -101,7 +101,9 @@ export default function CreatePollPage() {
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } }; message?: string };
       const message =
-        error?.response?.data?.message || error?.message || 'Failed to create poll. Please try again.';
+        error?.response?.data?.message ||
+        error?.message ||
+        'Failed to create poll. Please try again.';
       setSubmitError(message);
     } finally {
       setSubmitting(false);
@@ -122,7 +124,12 @@ export default function CreatePollPage() {
         )}
       </div>
 
-      <form onSubmit={(e) => { handleSubmit(onSubmit)(e).catch(console.error); }} className="space-y-8">
+      <form
+        onSubmit={(e) => {
+          handleSubmit(onSubmit)(e).catch(console.error);
+        }}
+        className="space-y-8"
+      >
         <Card className="bg-card border-border/50 shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="font-heading text-xl">Details</CardTitle>
@@ -184,7 +191,9 @@ export default function CreatePollPage() {
                 </Label>
                 <Select
                   defaultValue="anonymous"
-                  onValueChange={(val) => setValue('responseMode', val)}
+                  onValueChange={(val) =>
+                    setValue('responseMode', val as 'anonymous' | 'authenticated')
+                  }
                 >
                   <SelectTrigger
                     id="create-responseMode"

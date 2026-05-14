@@ -14,6 +14,7 @@
     "prepare": "husky",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "typecheck": "pnpm --filter @opinion/shared typecheck && pnpm --filter @opinion/api typecheck && pnpm --filter @opinion/web typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
