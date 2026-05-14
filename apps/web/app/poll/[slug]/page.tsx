@@ -4,11 +4,10 @@ import { use, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from '@/components/Charts';
-import { submitResponseSchema, type SubmitResponseInput } from '@opinion/shared';
+import type { SubmitResponseInput } from '@opinion/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -44,6 +43,14 @@ interface PublishedResults {
     totalAnswers: number;
   }[];
 }
+
+type VotingFormInput = {
+  answers: {
+    questionId: string;
+    selectedOption?: string;
+  }[];
+  turnstileToken?: string;
+};
 
 function QuestionCard({
   question,
@@ -83,11 +90,9 @@ function QuestionCard({
                 name: `answers.${index}.selectedOption`,
               },
             };
-            (
-              register(`answers.${index}.selectedOption`, {
-                required: question.isMandatory,
-              }).onChange
-            )(event);
+            register(`answers.${index}.selectedOption`, {
+              required: question.isMandatory,
+            }).onChange(event);
           }}
         >
           <div className="space-y-2">
@@ -145,12 +150,44 @@ function VotingForm({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SubmitResponseInput>({
-    resolver: zodResolver(submitResponseSchema),
-  });
+    setError,
+    clearErrors,
+  } = useForm<VotingFormInput>();
+
+  const onFormSubmit = (data: VotingFormInput) => {
+    clearErrors();
+
+    let hasError = false;
+    for (const [index, question] of poll.questions.entries()) {
+      const answer = data.answers[index];
+      if (question.isMandatory && (!answer || !answer.selectedOption)) {
+        setError(`answers.${index}.selectedOption`, {
+          message: 'Please select an option',
+        });
+        hasError = true;
+      }
+    }
+
+    if (hasError) return;
+
+    const filteredAnswers: SubmitResponseInput['answers'] = data.answers.flatMap(
+      (answer, index) => {
+        const question = poll.questions[index];
+        if (!question || !answer.selectedOption) return [];
+        return [{ questionId: answer.questionId, selectedOption: answer.selectedOption }];
+      },
+    );
+
+    onSubmit({ ...data, answers: filteredAnswers });
+  };
 
   return (
-    <form onSubmit={(e) => { handleSubmit((data) => onSubmit(data))(e).catch(console.error); }} className="space-y-6">
+    <form
+      onSubmit={(e) => {
+        handleSubmit(onFormSubmit)(e).catch(console.error);
+      }}
+      className="space-y-6"
+    >
       {poll.questions.map((question, index) => (
         <QuestionCard
           key={question._id}

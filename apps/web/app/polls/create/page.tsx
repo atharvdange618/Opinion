@@ -49,6 +49,7 @@ export default function CreatePollPage() {
     control,
     handleSubmit,
     setValue,
+    getValues,
     watch,
     reset,
     formState: { errors },
@@ -239,121 +240,124 @@ export default function CreatePollPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
-            {questionFields.map((field, qIndex) => (
-              <div
-                key={field.id}
-                className="group relative rounded-xl border border-border/60 bg-background/30 p-5 transition-all focus-within:bg-background/80 focus-within:ring-1 focus-within:ring-primary/20 hover:border-border"
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="inline-flex h-6 items-center rounded-md bg-primary/10 px-2 text-xs font-semibold text-primary">
-                    Question {qIndex + 1}
-                  </span>
-                  <div className="flex items-center gap-1 opacity-60 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 rounded-full"
-                      onClick={() => moveQuestion(qIndex, qIndex - 1)}
-                      disabled={qIndex === 0}
-                    >
-                      <ArrowUp className="size-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 rounded-full"
-                      onClick={() => moveQuestion(qIndex, qIndex + 1)}
-                      disabled={qIndex === questionFields.length - 1}
-                    >
-                      <ArrowDown className="size-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeQuestion(qIndex)}
-                      className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <Input
-                  {...register(`questions.${qIndex}.text`)}
-                  placeholder="Type your question here..."
-                  className="mb-5 h-11 border-transparent bg-background/50 text-base shadow-none transition-all focus-visible:border-primary/50 focus-visible:bg-background focus-visible:shadow-sm"
-                />
-
-                <div className="space-y-3 pl-2">
-                  {field.options.map((_, oIndex) => (
-                    <div key={oIndex} className="group/option flex items-center gap-3">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background text-xs font-medium text-muted-foreground">
-                        {String.fromCharCode(65 + oIndex)}
-                      </div>
-                      <Input
-                        {...register(`questions.${qIndex}.options.${oIndex}`)}
-                        placeholder={`Option ${oIndex + 1}`}
-                        className="h-10 flex-1 bg-background/50 transition-colors focus-visible:bg-background"
-                      />
-                      {field.options.length > 2 ? (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const newOptions = [...field.options];
-                            newOptions.splice(oIndex, 1);
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            setValue(`questions.${qIndex}.options` as any, newOptions);
-                          }}
-                          className="h-8 w-8 shrink-0 rounded-full text-destructive opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover/option:opacity-100 focus-visible:opacity-100"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
-                      ) : (
-                        <div className="h-8 w-8 shrink-0" />
-                      )}
+            {questionFields.map((field, qIndex) => {
+              const liveOptions = watch(`questions.${qIndex}.options`) || [];
+              return (
+                <div
+                  key={field.id}
+                  className="group relative rounded-xl border border-border/60 bg-background/30 p-5 transition-all focus-within:bg-background/80 focus-within:ring-1 focus-within:ring-primary/20 hover:border-border"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="inline-flex h-6 items-center rounded-md bg-primary/10 px-2 text-xs font-semibold text-primary">
+                      Question {qIndex + 1}
+                    </span>
+                    <div className="flex items-center gap-1 opacity-60 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={() => moveQuestion(qIndex, qIndex - 1)}
+                        disabled={qIndex === 0}
+                      >
+                        <ArrowUp className="size-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={() => moveQuestion(qIndex, qIndex + 1)}
+                        disabled={qIndex === questionFields.length - 1}
+                      >
+                        <ArrowDown className="size-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeQuestion(qIndex)}
+                        className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      setValue(`questions.${qIndex}.options` as any, [...field.options, '']);
-                    }}
-                    className="rounded-full text-muted-foreground hover:text-foreground"
-                  >
-                    <Plus className="mr-1.5 size-4" />
-                    Add option
-                  </Button>
+                  <Input
+                    {...register(`questions.${qIndex}.text`)}
+                    placeholder="Type your question here..."
+                    className="mb-5 h-11 border-transparent bg-background/50 text-base shadow-none transition-all focus-visible:border-primary/50 focus-visible:bg-background focus-visible:shadow-sm"
+                  />
 
-                  <div className="flex items-center gap-2.5 rounded-full border border-border/40 bg-background/40 px-3 py-1.5">
-                    <Checkbox
-                      id={`mandatory-${qIndex}`}
-                      checked={watch(`questions.${qIndex}.isMandatory`)}
-                      onCheckedChange={(checked) =>
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        setValue(`questions.${qIndex}.isMandatory` as any, checked === true)
-                      }
-                    />
-                    <Label
-                      htmlFor={`mandatory-${qIndex}`}
-                      className="cursor-pointer text-xs font-medium"
+                  <div className="space-y-3 pl-2">
+                    {liveOptions.map((_, oIndex) => (
+                      <div key={oIndex} className="group/option flex items-center gap-3">
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background text-xs font-medium text-muted-foreground">
+                          {String.fromCharCode(65 + oIndex)}
+                        </div>
+                        <Input
+                          {...register(`questions.${qIndex}.options.${oIndex}`)}
+                          placeholder={`Option ${oIndex + 1}`}
+                          className="h-10 flex-1 bg-background/50 transition-colors focus-visible:bg-background"
+                        />
+                        {liveOptions.length > 2 ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              const currentOptions = getValues(`questions.${qIndex}.options`);
+                              const newOptions = [...currentOptions];
+                              newOptions.splice(oIndex, 1);
+                              setValue(`questions.${qIndex}.options`, newOptions);
+                            }}
+                            className="h-8 w-8 shrink-0 rounded-full text-destructive opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover/option:opacity-100 focus-visible:opacity-100"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        ) : (
+                          <div className="h-8 w-8 shrink-0" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const currentOptions = getValues(`questions.${qIndex}.options`);
+                        setValue(`questions.${qIndex}.options`, [...currentOptions, '']);
+                      }}
+                      className="rounded-full text-muted-foreground hover:text-foreground"
                     >
-                      Required
-                    </Label>
+                      <Plus className="mr-1.5 size-4" />
+                      Add option
+                    </Button>
+
+                    <div className="flex items-center gap-2.5 rounded-full border border-border/40 bg-background/40 px-3 py-1.5">
+                      <Checkbox
+                        id={`mandatory-${qIndex}`}
+                        checked={watch(`questions.${qIndex}.isMandatory`)}
+                        onCheckedChange={(checked) =>
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          setValue(`questions.${qIndex}.isMandatory` as any, checked === true)
+                        }
+                      />
+                      <Label
+                        htmlFor={`mandatory-${qIndex}`}
+                        className="cursor-pointer text-xs font-medium"
+                      >
+                        Required
+                      </Label>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
 
