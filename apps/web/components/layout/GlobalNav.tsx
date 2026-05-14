@@ -80,7 +80,11 @@ export function GlobalNav() {
                 <Link href={`${API_URL}/api/auth/login`}>Sign in</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href={`${API_URL}/api/auth/login?redirect=${encodeURIComponent("/polls/create")}`}>Get started</Link>
+                <Link
+                  href={`${API_URL}/api/auth/login?redirect=${encodeURIComponent("/polls/create")}`}
+                >
+                  Get started
+                </Link>
               </Button>
             </>
           )}

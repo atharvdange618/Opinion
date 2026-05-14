@@ -17,7 +17,9 @@ export function CTA({ hasSession }: { hasSession: boolean }) {
         <div
           className={cn(
             "relative flex flex-col items-start gap-8 overflow-hidden rounded-2xl bg-primary/[0.03] px-8 py-12 ring-1 ring-foreground/5 sm:flex-row sm:items-center sm:px-12 sm:py-16 lg:px-16 transition-all duration-1000 ease-out",
-            inView ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[0.97] opacity-0"
+            inView
+              ? "translate-y-0 scale-100 opacity-100"
+              : "translate-y-8 scale-[0.97] opacity-0",
           )}
         >
           <div className="flex-1">

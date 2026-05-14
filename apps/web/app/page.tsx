@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { cookies } from "next/headers";
-import { Button } from "@/components/ui/button";
-import { HeroArt } from "@/components/illustrations/HeroArt";
+import { Hero } from "@/components/landing/Hero";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { UseCases } from "@/components/landing/UseCases";
 import { Features } from "@/components/landing/Features";
+import { FAQ } from "@/components/landing/FAQ";
 import { CTA } from "@/components/landing/CTA";
-import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Opinion",
@@ -22,55 +22,15 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col">
-      <section className="relative overflow-hidden px-4 pb-24 pt-20 sm:pb-28 sm:pt-32">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid items-end gap-12 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <h1 className="animate-slide-up font-heading text-[clamp(2.5rem,5vw,4rem)] leading-[1.1] tracking-tight text-foreground [animation-delay:100ms] [animation-fill-mode:backwards]">
-                Ask anonymously.{" "}
-                <span className="text-primary">Get honest answers.</span>
-              </h1>
-              <p className="mt-6 animate-slide-up max-w-lg text-lg leading-relaxed text-muted-foreground [animation-delay:200ms] [animation-fill-mode:backwards]">
-                Create polls, share them with a link, and watch responses come
-                in live. Anonymous or authenticated - you decide who can answer.
-              </p>
-              <p className="mt-4 animate-slide-up max-w-lg text-base leading-relaxed text-muted-foreground [animation-delay:250ms] [animation-fill-mode:backwards]">
-                Opinion is a free, real-time polling platform built for teams,
-                creators, educators, and communities. Each poll comes with a
-                live analytics dashboard, anti-spam protection powered by
-                Cloudflare Turnstile, and duplicate vote prevention. Set an
-                expiry date, choose between anonymous or authenticated
-                responses, and watch results update in real-time as people
-                participate.
-              </p>
-              <div className="mt-8 flex animate-slide-up flex-wrap items-center gap-4 [animation-delay:300ms] [animation-fill-mode:backwards]">
-                <Button size="lg" asChild>
-                  <Link
-                    href={
-                      session
-                        ? "/polls/create"
-                        : `${API_URL}/api/auth/login?redirect=${encodeURIComponent("https://opinion.atharvdangedev.in/polls/create")}`
-                    }
-                  >
-                    Create your first poll
-                    <ArrowRight className="ml-2 size-4" />
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="lg" asChild>
-                  <Link href={session ? "/dashboard" : `${API_URL}/api/auth/login`}>
-                    {session ? "Go to dashboard" : "Sign in"}
-                  </Link>
-                </Button>
-              </div>
-            </div>
-            <div className="hidden animate-scale-in lg:block [animation-delay:400ms] [animation-fill-mode:backwards]">
-              <HeroArt />
-            </div>
-          </div>
-        </div>
-      </section>
+      <Hero hasSession={!!session} apiUrl={API_URL} />
+
+      <HowItWorks />
+
+      <UseCases />
 
       <Features />
+
+      <FAQ />
 
       <CTA hasSession={!!session} />
     </div>

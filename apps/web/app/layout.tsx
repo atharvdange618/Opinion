@@ -6,18 +6,13 @@ import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { GlobalNav } from "@/components/layout/GlobalNav";
 import { GlobalFooter } from "@/components/layout/GlobalFooter";
 import { JsonLd } from "@/components/JsonLd";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
-import { Inter, Literata } from "next/font/google";
+import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 
-const literata = Literata({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-heading",
-});
-
-const inter = Inter({
+const geist = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -78,19 +73,21 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("font-sans", inter.variable, literata.variable)}
+      className={cn("font-sans", geist.variable)}
     >
       <body>
         <ThemeProvider>
           <AuthProvider hasSession={hasSession}>
             <QueryClientProvider>
-              <div className="flex min-h-screen flex-col">
-                <GlobalNav />
-                <main className="flex-1">{children}</main>
-                <GlobalFooter />
-              </div>
-              <Toaster />
-              <JsonLd />
+              <TooltipProvider>
+                <div className="flex min-h-screen flex-col">
+                  <GlobalNav />
+                  <main className="flex-1">{children}</main>
+                  <GlobalFooter />
+                </div>
+                <Toaster />
+                <JsonLd />
+              </TooltipProvider>
             </QueryClientProvider>
           </AuthProvider>
         </ThemeProvider>

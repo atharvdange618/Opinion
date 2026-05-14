@@ -16,6 +16,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyPolls } from "@/components/illustrations/EmptyPolls";
 import { Plus, BarChart3, Pencil, Users, ExternalLink } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PollSummary {
   _id: string;
@@ -69,50 +74,39 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      <div className="mb-12 grid gap-6 sm:grid-cols-3">
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Polls
-            </CardTitle>
-            <span className="font-mono text-xs tabular-nums text-muted-foreground">
-              all time
+      <div className="mb-12 flex flex-wrap gap-x-10 gap-y-2 rounded-xl border border-border/40 bg-card px-7 py-5">
+        <div className="flex items-baseline gap-2">
+          <span className="text-sm text-muted-foreground">Total polls</span>
+          {isLoading ? (
+            <Skeleton className="h-6 w-10" />
+          ) : (
+            <span className="font-heading text-xl font-semibold tabular-nums text-foreground">
+              {stats.total}
             </span>
-          </CardHeader>
-          <CardContent>
-            <div className="font-heading text-3xl font-bold tabular-nums">
-              {isLoading ? <Skeleton className="h-8 w-12" /> : stats.total}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Responses
-            </CardTitle>
-            <Users className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-heading text-3xl font-bold tabular-nums">
-              {isLoading ? <Skeleton className="h-8 w-16" /> : stats.responses}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Polls
-            </CardTitle>
-            <span className="font-mono text-xs tabular-nums text-success">
-              live
+          )}
+        </div>
+        <div className="flex items-baseline gap-2">
+          <Users className="size-3.5 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Responses</span>
+          {isLoading ? (
+            <Skeleton className="h-6 w-14" />
+          ) : (
+            <span className="font-heading text-xl font-semibold tabular-nums text-foreground">
+              {stats.responses}
             </span>
-          </CardHeader>
-          <CardContent>
-            <div className="font-heading text-3xl font-bold tabular-nums">
-              {isLoading ? <Skeleton className="h-8 w-10" /> : stats.active}
-            </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className="flex size-2 rounded-full bg-success" />
+          <span className="text-sm text-muted-foreground">Active</span>
+          {isLoading ? (
+            <Skeleton className="h-6 w-8" />
+          ) : (
+            <span className="font-heading text-xl font-semibold tabular-nums text-foreground">
+              {stats.active}
+            </span>
+          )}
+        </div>
       </div>
 
       {isLoading ? (
@@ -192,26 +186,28 @@ export default function DashboardPage() {
                       Analytics
                     </Link>
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                  >
-                    <Link href={`/polls/${poll._id}/edit`}>
-                      <Pencil className="size-3.5" />
-                      <span className="sr-only">Edit poll</span>
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                  >
-                    <Link href={`/poll/${poll.slug}`} target="_blank">
-                      <ExternalLink className="size-3.5" />
-                      <span className="sr-only">View public poll</span>
-                    </Link>
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/polls/${poll._id}/edit`}>
+                          <Pencil className="size-3.5" />
+                        </Link>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Edit poll</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/poll/${poll.slug}`} target="_blank">
+                          <ExternalLink className="size-3.5" />
+                        </Link>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      View public page
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </CardContent>
             </Card>

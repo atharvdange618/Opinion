@@ -15,7 +15,9 @@ export function AnimatedCTA({ hasSession }: { hasSession: boolean }) {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom,oklch(0.68_0.1_25_/_0.04),transparent_70%)]" />
       <div
         className={`mx-auto max-w-3xl text-center transition-all duration-1000 ease-out ${
-          inView ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[0.97] opacity-0"
+          inView
+            ? "translate-y-0 scale-100 opacity-100"
+            : "translate-y-8 scale-[0.97] opacity-0"
         }`}
       >
         <h2 className="font-heading text-3xl font-semibold">
@@ -26,13 +28,13 @@ export function AnimatedCTA({ hasSession }: { hasSession: boolean }) {
         </p>
         <div className="mt-8">
           <Button size="lg" asChild>
-              <Link
-                href={
-                  hasSession
-                    ? "/polls/create"
-                    : `${API_URL}/api/auth/login?redirect=${encodeURIComponent("/polls/create")}`
-                }
-              >
+            <Link
+              href={
+                hasSession
+                  ? "/polls/create"
+                  : `${API_URL}/api/auth/login?redirect=${encodeURIComponent("/polls/create")}`
+              }
+            >
               Create your first poll
               <ArrowRight className="ml-2 size-4" />
             </Link>

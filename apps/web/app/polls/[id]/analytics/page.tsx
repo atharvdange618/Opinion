@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
@@ -11,25 +11,28 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  Cell,
 } from "@/components/Charts";
 import type { AnalyticsData } from "@opinion/shared";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
   Copy,
-  Share2,
-  CheckCircle2,
+  ShareNetwork,
+  CheckCircle,
   Users,
-  ShieldAlert,
-  ShieldCheck,
   Clock,
-  ExternalLink,
-  Activity,
-  Calendar,
-  TrendingDown,
-} from "lucide-react";
+  TrendDown,
+  ArrowUpRight,
+  Eye,
+  ActivityIcon,
+  ShieldCheck,
+  Shield,
+} from "@phosphor-icons/react";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const HOURS = Array.from({ length: 24 }, (_, i) => {
@@ -43,6 +46,14 @@ function formatHoursAgo(hours: number): string {
   const days = Math.floor(hours / 24);
   return days === 1 ? "1 day ago" : `${days} days ago`;
 }
+
+const CHART_COLORS = [
+  "var(--color-chart-1)",
+  "var(--color-chart-2)",
+  "var(--color-chart-3)",
+  "var(--color-chart-4)",
+  "var(--color-chart-5)",
+];
 
 export default function AnalyticsPage({
   params,
@@ -116,28 +127,14 @@ export default function AnalyticsPage({
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <Skeleton className="mb-10 h-10 w-64" />
-        <div className="mb-10 grid grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-32 rounded-xl" />
-          ))}
-        </div>
-        <Skeleton className="h-80 rounded-2xl" />
-      </div>
+  const anonPercent = useMemo(() => {
+    if (!analytics || analytics.totalResponses === 0) return 0;
+    return Math.round(
+      (analytics.participationInsights.anonymous / analytics.totalResponses) *
+        100,
     );
-  }
+  }, [analytics]);
 
-  const anonPercent =
-    analytics && analytics.totalResponses > 0
-      ? Math.round(
-          (analytics.participationInsights.anonymous /
-            analytics.totalResponses) *
-            100,
-        )
-      : 0;
   const authPercent = 100 - anonPercent;
 
   const peakHour = analytics?.engagement.peakActivity.hour ?? null;
@@ -145,7 +142,7 @@ export default function AnalyticsPage({
   const peakTime =
     peakHour !== null
       ? `${HOURS[peakHour]}${peakDay !== null ? " on " + DAYS[peakDay] : ""}`
-      : "-";
+      : null;
 
   const totalQuestions = analytics?.questionSummaries.length ?? 0;
   const maxVotes = analytics?.pollHealth.votesPerQuestion
@@ -154,162 +151,155 @@ export default function AnalyticsPage({
       )
     : 0;
 
+  const dropOff =
+    totalQuestions > 1 && maxVotes > 0
+      ? Math.round(
+          ((maxVotes -
+            (analytics?.pollHealth.votesPerQuestion?.[totalQuestions - 1]
+              ?.totalAnswers ?? 0)) /
+            maxVotes) *
+            100,
+        )
+      : null;
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <Skeleton className="mb-4 h-10 w-72" />
+        <div className="mb-16 grid grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-2xl" />
+          ))}
+        </div>
+        <Skeleton className="mb-8 h-72 rounded-2xl" />
+        <Skeleton className="h-80 rounded-2xl" />
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
-      <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+    <div className="mx-auto max-w-6xl px-4 py-16">
+      <header className="mb-16 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <h1 className="font-heading text-4xl font-semibold tracking-tight">
             {poll?.title || "Poll Analytics"}
           </h1>
-          <div className="mt-2 flex items-center gap-3 font-mono text-xs text-muted-foreground">
+          <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span
-                className={`size-1.5 rounded-full ${poll?.status === "active" ? "bg-success" : "bg-muted-foreground"}`}
+                className={`size-1.5 rounded-full ${
+                  poll?.status === "active"
+                    ? "bg-success"
+                    : "bg-muted-foreground"
+                }`}
               />
               {poll?.status}
             </span>
-            <span className="text-muted-foreground/50">/</span>
-            <span className="flex items-center gap-1.5">
-              <ExternalLink className="size-3" />
+            <span className="text-muted-foreground/30">/</span>
+            <a
+              href={`/poll/${poll?.slug}`}
+              className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+            >
+              <ArrowUpRight weight="bold" className="size-3" />
               /poll/{poll?.slug}
-            </span>
+            </a>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleCopyLink} disabled={copying}>
             {copying ? (
-              <CheckCircle2 className="mr-2 size-4 text-success" />
+              <CheckCircle className="mr-2 size-4 text-success" weight="bold" />
             ) : (
-              <Copy className="mr-2 size-4" />
+              <Copy className="mr-2 size-4" weight="bold" />
             )}
             Copy link
           </Button>
           {poll?.status !== "published" && (
             <Button onClick={handlePublish} disabled={publishing}>
-              <Share2 className="mr-2 size-4" />
+              <ShareNetwork className="mr-2 size-4" weight="bold" />
               {publishing ? "Publishing" : "Publish results"}
             </Button>
           )}
         </div>
-      </div>
+      </header>
 
-      <div className="mb-8 grid gap-6 sm:grid-cols-3">
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+      <section className="mb-16">
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border/40 bg-border/40 sm:grid-cols-12">
+          <div className="col-span-12 bg-card px-8 py-7 sm:col-span-5">
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Users weight="bold" className="size-4" />
               Total Responses
-            </CardTitle>
-            <Users className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-heading text-4xl font-bold tabular-nums">
+            </p>
+            <p className="mt-2 font-heading text-5xl font-semibold tabular-nums tracking-tight text-foreground">
               {analytics?.totalResponses ?? 0}
             </p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Anonymous
-            </CardTitle>
-            <ShieldAlert className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-heading text-4xl font-bold tabular-nums">
-              {analytics?.participationInsights?.anonymous ?? 0}
-            </p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              {anonPercent}% of responses
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Authenticated
-            </CardTitle>
-            <ShieldCheck className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-heading text-4xl font-bold tabular-nums">
-              {analytics?.participationInsights?.authenticated ?? 0}
-            </p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              {authPercent}% of responses
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="mt-4 flex items-center gap-4">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Shield weight="bold" className="size-3" />
+                {analytics?.participationInsights.anonymous ?? 0} anonymous
+              </span>
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <ShieldCheck weight="bold" className="size-3" />
+                {analytics?.participationInsights.authenticated ?? 0}{" "}
+                authenticated
+              </span>
+            </div>
+            {analytics && analytics.totalResponses > 0 && (
+              <div className="mt-4 flex h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="bg-chart-1 transition-all duration-700"
+                  style={{ width: `${anonPercent}%` }}
+                />
+                <div
+                  className="bg-chart-3 transition-all duration-700"
+                  style={{ width: `${authPercent}%` }}
+                />
+              </div>
+            )}
+          </div>
 
-      <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Poll Duration
-            </CardTitle>
-            <Clock className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-heading text-3xl font-bold tabular-nums">
+          <div className="col-span-12 bg-card px-8 py-7 sm:col-span-3">
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <ActivityIcon weight="bold" className="size-4" />
+              Peak activity
+            </p>
+            <p className="mt-2 font-heading text-3xl font-semibold tabular-nums text-foreground">
+              {peakTime ?? (
+                <span className="text-base font-normal text-muted-foreground">
+                  N/A
+                </span>
+              )}
+            </p>
+            {analytics?.engagement.uniqueRespondents !== undefined && (
+              <p className="mt-4 text-xs text-muted-foreground">
+                {analytics.engagement.uniqueRespondents} unique respondents
+              </p>
+            )}
+          </div>
+
+          <div className="col-span-12 bg-card px-8 py-7 sm:col-span-2">
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Clock weight="bold" className="size-4" />
+              Duration
+            </p>
+            <p className="mt-2 font-heading text-3xl font-semibold tabular-nums text-foreground">
               {analytics?.pollHealth.pollDuration ?? "-"}
             </p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              active window
+            <p className="mt-4 text-xs text-muted-foreground">
+              {formatHoursAgo(analytics?.pollHealth.pollDurationHours ?? 0)}
             </p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Peak Activity
-            </CardTitle>
-            <Activity className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-heading text-xl font-bold">{peakTime}</p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              busiest time window
+          </div>
+
+          <div className="col-span-12 bg-card px-8 py-7 sm:col-span-2">
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <TrendDown weight="bold" className="size-4" />
+              Drop-off
             </p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Created
-            </CardTitle>
-            <Calendar className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-heading text-xl font-bold">
-              {formatHoursAgo(analytics?.pollHealth.hoursSinceCreation ?? 0)}
-            </p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              {analytics?.totalResponses ?? 0} responses gathered
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Drop-off Rate
-            </CardTitle>
-            <TrendingDown className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-heading text-3xl font-bold tabular-nums">
-              {totalQuestions > 1 ? (
+            <p className="mt-2 font-heading text-3xl font-semibold tabular-nums text-foreground">
+              {dropOff !== null ? (
                 <>
-                  {maxVotes > 0
-                    ? Math.round(
-                        ((maxVotes -
-                          (analytics?.pollHealth.votesPerQuestion?.[
-                            totalQuestions - 1
-                          ]?.totalAnswers ?? 0)) /
-                          maxVotes) *
-                          100,
-                      )
-                    : 0}
-                  <span className="ml-1 text-base font-normal text-muted-foreground">
+                  {dropOff}
+                  <span className="ml-0.5 text-base font-normal text-muted-foreground">
                     %
                   </span>
                 </>
@@ -319,117 +309,69 @@ export default function AnalyticsPage({
                 </span>
               )}
             </p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              {totalQuestions > 1
-                ? `${analytics?.pollHealth.votesPerQuestion?.[0]?.totalAnswers ?? 0} → ${analytics?.pollHealth.votesPerQuestion?.[totalQuestions - 1]?.totalAnswers ?? 0} (Q1 → Q${totalQuestions})`
-                : "single question"}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="space-y-8">
-        {analytics?.questionSummaries?.map((summary) => {
-          const winner = summary.options.reduce((a, b) =>
-            a.count > b.count ? a : b,
-          );
-          const winnerPercent =
-            summary.totalAnswers > 0
-              ? Math.round((winner.count / summary.totalAnswers) * 100)
-              : 0;
-
-          return (
-            <Card key={summary.questionId} className="border-border/60 bg-card">
-              <CardHeader className="border-b border-border/40 pb-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <CardTitle className="font-heading text-xl leading-snug">
-                    {summary.questionText}
-                  </CardTitle>
-                  <div className="flex items-center gap-3 font-mono text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <Users className="size-3.5" />
-                      {summary.totalAnswers} answers
-                    </span>
-                    <span className="text-muted-foreground/50">/</span>
-                    <span className="flex items-center gap-1.5">
-                      <ShieldCheck className="size-3.5 text-success" />
-                      {winner.option} leading at {winnerPercent}%
-                    </span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={summary.options}
-                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                    >
-                      <XAxis
-                        dataKey="option"
-                        tick={{
-                          fill: "currentColor",
-                          opacity: 0.5,
-                          fontSize: 12,
-                        }}
-                        axisLine={false}
-                        tickLine={false}
-                        dy={10}
-                      />
-                      <YAxis
-                        tick={{
-                          fill: "currentColor",
-                          opacity: 0.5,
-                          fontSize: 12,
-                        }}
-                        axisLine={false}
-                        tickLine={false}
-                        dx={-10}
-                      />
-                      <Tooltip
-                        cursor={{ fill: "var(--color-primary)", opacity: 0.05 }}
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "1px solid var(--color-border)",
-                          backgroundColor: "var(--color-card)",
-                          boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                        }}
-                      />
-                      <Bar
-                        dataKey="count"
-                        fill="var(--color-primary)"
-                        radius={[6, 6, 0, 0]}
-                        maxBarSize={60}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+            {dropOff !== null && (
+              <p className="mt-4 text-xs text-muted-foreground">
+                Q1 → Q{totalQuestions}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
 
       {analytics?.timeline && analytics.timeline.length > 0 && (
-        <Card className="mt-8 border-border/60 bg-card">
-          <CardHeader className="border-b border-border/40 pb-4 flex flex-row items-center justify-between">
-            <CardTitle className="font-heading text-xl">
-              Responses over time
-            </CardTitle>
-            <Clock className="size-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="pt-6">
+        <section className="mb-16">
+          <div className="rounded-2xl border border-border/40 bg-card p-8">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="font-heading text-lg font-semibold text-foreground">
+                  Responses over time
+                </h2>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Daily response volume
+                </p>
+              </div>
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Eye weight="bold" className="size-3" />
+                {analytics.timeline.reduce((s, e) => s + e.count, 0)} total
+              </span>
+            </div>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
+                <AreaChart
                   data={analytics.timeline}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
                 >
+                  <defs>
+                    <linearGradient
+                      id="timelineFill"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor="var(--color-chart-1)"
+                        stopOpacity={0.2}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor="var(--color-chart-1)"
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--color-border)"
+                    strokeOpacity={0.4}
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="date"
                     tick={{
                       fill: "currentColor",
-                      opacity: 0.5,
+                      opacity: 0.4,
                       fontSize: 12,
                     }}
                     axisLine={false}
@@ -439,34 +381,158 @@ export default function AnalyticsPage({
                   <YAxis
                     tick={{
                       fill: "currentColor",
-                      opacity: 0.5,
+                      opacity: 0.4,
                       fontSize: 12,
                     }}
                     axisLine={false}
                     tickLine={false}
                     dx={-10}
+                    allowDecimals={false}
                   />
                   <Tooltip
-                    cursor={{ fill: "var(--color-secondary)", opacity: 0.05 }}
+                    cursor={{
+                      stroke: "var(--color-border)",
+                      strokeOpacity: 0.6,
+                    }}
                     contentStyle={{
-                      borderRadius: "12px",
+                      borderRadius: "8px",
                       border: "1px solid var(--color-border)",
                       backgroundColor: "var(--color-card)",
-                      boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      fontSize: "13px",
                     }}
                   />
-                  <Bar
+                  <Area
+                    type="monotone"
                     dataKey="count"
-                    fill="var(--color-secondary)"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={60}
+                    stroke="var(--color-chart-1)"
+                    strokeWidth={2}
+                    fill="url(#timelineFill)"
                   />
-                </BarChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
+
+      {analytics?.questionSummaries &&
+        analytics.questionSummaries.length > 0 && (
+          <section>
+            <h2 className="mb-8 font-heading text-lg font-semibold text-foreground">
+              Question breakdown
+            </h2>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {analytics.questionSummaries.map((summary, idx) => {
+                const winner = summary.options.reduce((a, b) =>
+                  a.count > b.count ? a : b,
+                );
+                const winnerPercent =
+                  summary.totalAnswers > 0
+                    ? Math.round((winner.count / summary.totalAnswers) * 100)
+                    : 0;
+
+                const isLastOdd =
+                  idx === analytics.questionSummaries.length - 1 &&
+                  analytics.questionSummaries.length % 2 === 1;
+
+                return (
+                  <div
+                    key={summary.questionId}
+                    className={`rounded-2xl border border-border/40 bg-card p-8 ${
+                      isLastOdd ? "lg:col-span-2" : ""
+                    }`}
+                  >
+                    <div className="mb-6">
+                      <h3 className="font-heading text-base font-semibold leading-snug text-foreground">
+                        {summary.questionText}
+                      </h3>
+                      <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Users weight="bold" className="size-3" />
+                          {summary.totalAnswers} answers
+                        </span>
+                        <span className="text-muted-foreground/30">/</span>
+                        <span>
+                          {winner.option} leading at {winnerPercent}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={summary.options}
+                          margin={{
+                            top: 8,
+                            right: 8,
+                            left: -20,
+                            bottom: 0,
+                          }}
+                        >
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="var(--color-border)"
+                            strokeOpacity={0.3}
+                            horizontal={true}
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="option"
+                            tick={{
+                              fill: "currentColor",
+                              opacity: 0.5,
+                              fontSize: 12,
+                            }}
+                            axisLine={false}
+                            tickLine={false}
+                            dy={10}
+                          />
+                          <YAxis
+                            tick={{
+                              fill: "currentColor",
+                              opacity: 0.5,
+                              fontSize: 12,
+                            }}
+                            axisLine={false}
+                            tickLine={false}
+                            dx={-10}
+                            allowDecimals={false}
+                          />
+                          <Tooltip
+                            cursor={{
+                              fill: "var(--color-chart-1)",
+                              opacity: 0.05,
+                            }}
+                            contentStyle={{
+                              borderRadius: "8px",
+                              border: "1px solid var(--color-border)",
+                              backgroundColor: "var(--color-card)",
+                              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                              fontSize: "13px",
+                            }}
+                          />
+                          <Bar
+                            dataKey="count"
+                            radius={[4, 4, 0, 0]}
+                            maxBarSize={48}
+                          >
+                            {summary.options.map((_, i) => (
+                              <Cell
+                                key={i}
+                                fill={CHART_COLORS[i % CHART_COLORS.length]}
+                              />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
     </div>
   );
 }

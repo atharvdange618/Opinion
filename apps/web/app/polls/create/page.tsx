@@ -20,22 +20,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { DateTimePicker } from "@/components/datetime-picker";
+
+const DRAFT_KEY = "opinion-poll-draft";
 
 export default function CreatePollPage() {
   const { push } = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
 
   useEffect(() => {
     document.title = "Create Poll - Opinion";
   }, []);
+
+  const defaultValues = {
+    title: "",
+    description: "",
+    expiresAt: "",
+    responseMode: "anonymous" as const,
+    questions: [{ text: "", options: ["", ""], isMandatory: false, order: 0 }],
+  };
 
   const {
     register,
@@ -43,19 +50,37 @@ export default function CreatePollPage() {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<FormInput>({
     resolver: zodResolver(createPollSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      expiresAt: "",
-      responseMode: "anonymous",
-      questions: [
-        { text: "", options: ["", ""], isMandatory: false, order: 0 },
-      ],
-    },
+    defaultValues,
   });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        reset(parsed, { keepDefaultValues: false });
+        setDraftRestored(true);
+      }
+    } catch {}
+  }, [reset]);
+
+  const formValues = watch();
+  useEffect(() => {
+    const hasContent =
+      formValues.title ||
+      formValues.description ||
+      formValues.questions?.some((q) => q.text || q.options?.some((o) => o));
+    if (hasContent) {
+      const timer = setTimeout(() => {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(formValues));
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [formValues]);
 
   const {
     fields: questionFields,
@@ -66,11 +91,17 @@ export default function CreatePollPage() {
 
   async function onSubmit(data: FormInput) {
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const res = await api.post("/polls", data);
+      localStorage.removeItem(DRAFT_KEY);
       push(`/polls/${res.data._id}/analytics`);
-    } catch {
-      alert("Failed to create poll");
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to create poll. Please try again.";
+      setSubmitError(message);
     } finally {
       setSubmitting(false);
     }
@@ -79,20 +110,29 @@ export default function CreatePollPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <div className="mb-10">
-        <h1 className="font-heading text-4xl font-semibold tracking-tight">Create Poll</h1>
+        <h1 className="font-heading text-4xl font-semibold tracking-tight">
+          Create Poll
+        </h1>
         <p className="mt-2 text-lg text-muted-foreground">
           Design your poll and start collecting feedback instantly.
         </p>
+        {draftRestored && (
+          <div className="mt-4 animated fade-in rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">
+            Draft restored from your last session.
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        <Card className="bg-card/40 backdrop-blur-xl border-border/50 shadow-sm">
+        <Card className="bg-card border-border/50 shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="font-heading text-xl">Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
             <div className="space-y-3">
-              <Label htmlFor="create-title" className="text-sm font-medium">Title</Label>
+              <Label htmlFor="create-title" className="text-sm font-medium">
+                Title
+              </Label>
               <Input
                 id="create-title"
                 className="bg-background/50 h-12 text-lg transition-colors focus-visible:bg-background"
@@ -107,7 +147,15 @@ export default function CreatePollPage() {
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="create-description" className="text-sm font-medium">Description <span className="text-muted-foreground font-normal">(Optional)</span></Label>
+              <Label
+                htmlFor="create-description"
+                className="text-sm font-medium"
+              >
+                Description{" "}
+                <span className="text-muted-foreground font-normal">
+                  (Optional)
+                </span>
+              </Label>
               <Textarea
                 id="create-description"
                 className="bg-background/50 resize-none transition-colors focus-visible:bg-background"
@@ -119,10 +167,26 @@ export default function CreatePollPage() {
 
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-3">
-                <Label htmlFor="create-expiresAt" className="text-sm font-medium">Expires at</Label>
+                <Label
+                  htmlFor="create-expiresAt"
+                  className="text-sm font-medium"
+                >
+                  Expires at
+                </Label>
                 <DateTimePicker
-                  date={watch("expiresAt") && !isNaN(Date.parse(watch("expiresAt") as string)) ? new Date(watch("expiresAt") as string) : undefined}
-                  onDateChange={(date) => setValue("expiresAt" as any, date ? date.toISOString() : "", { shouldValidate: true })}
+                  date={
+                    watch("expiresAt") &&
+                    !isNaN(Date.parse(watch("expiresAt") as string))
+                      ? new Date(watch("expiresAt") as string)
+                      : undefined
+                  }
+                  onDateChange={(date) =>
+                    setValue(
+                      "expiresAt" as any,
+                      date ? date.toISOString() : "",
+                      { shouldValidate: true },
+                    )
+                  }
                 />
                 {errors.expiresAt && (
                   <p className="text-sm font-medium text-destructive">
@@ -132,14 +196,20 @@ export default function CreatePollPage() {
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="create-responseMode" className="text-sm font-medium">Response mode</Label>
+                <Label
+                  htmlFor="create-responseMode"
+                  className="text-sm font-medium"
+                >
+                  Response mode
+                </Label>
                 <Select
                   defaultValue="anonymous"
-                    onValueChange={(val) =>
-                        setValue("responseMode" as any, val)
-                    }
+                  onValueChange={(val) => setValue("responseMode" as any, val)}
                 >
-                  <SelectTrigger id="create-responseMode" className="bg-background/50 h-11 transition-colors focus-visible:bg-background">
+                  <SelectTrigger
+                    id="create-responseMode"
+                    className="bg-background/50 h-11 transition-colors focus-visible:bg-background"
+                  >
                     <SelectValue placeholder="Select mode" />
                   </SelectTrigger>
                   <SelectContent>
@@ -147,12 +217,16 @@ export default function CreatePollPage() {
                     <SelectItem value="authenticated">Authenticated</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  Anonymous lets anyone respond without signing in.
+                  Authenticated requires a verified account.
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card/40 backdrop-blur-xl border-border/50 shadow-sm">
+        <Card className="bg-card border-border/50 shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="font-heading text-xl">Questions</CardTitle>
@@ -226,7 +300,10 @@ export default function CreatePollPage() {
 
                 <div className="space-y-3 pl-2">
                   {field.options.map((_, oIndex) => (
-                    <div key={oIndex} className="group/option flex items-center gap-3">
+                    <div
+                      key={oIndex}
+                      className="group/option flex items-center gap-3"
+                    >
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background text-xs font-medium text-muted-foreground">
                         {String.fromCharCode(65 + oIndex)}
                       </div>
@@ -265,10 +342,10 @@ export default function CreatePollPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      setValue(
-                        `questions.${qIndex}.options` as any,
-                        [...field.options, ""],
-                      );
+                      setValue(`questions.${qIndex}.options` as any, [
+                        ...field.options,
+                        "",
+                      ]);
                     }}
                     className="rounded-full text-muted-foreground hover:text-foreground"
                   >
@@ -287,7 +364,10 @@ export default function CreatePollPage() {
                         )
                       }
                     />
-                    <Label htmlFor={`mandatory-${qIndex}`} className="cursor-pointer text-xs font-medium">
+                    <Label
+                      htmlFor={`mandatory-${qIndex}`}
+                      className="cursor-pointer text-xs font-medium"
+                    >
                       Required
                     </Label>
                   </div>
@@ -297,8 +377,21 @@ export default function CreatePollPage() {
           </CardContent>
         </Card>
 
+        {submitError && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-5 py-4">
+            <p className="text-sm font-medium text-destructive">
+              {submitError}
+            </p>
+          </div>
+        )}
+
         <div className="flex justify-end pt-4">
-          <Button type="submit" size="lg" disabled={submitting} className="min-w-48 rounded-full shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5">
+          <Button
+            type="submit"
+            size="lg"
+            disabled={submitting}
+            className="min-w-48 rounded-full shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5"
+          >
             {submitting ? "Creating Poll..." : "Publish Poll"}
           </Button>
         </div>

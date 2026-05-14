@@ -7,6 +7,10 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  Cell,
 } from "recharts";
 
 export {
@@ -16,4 +20,8 @@ export {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  Cell,
 };

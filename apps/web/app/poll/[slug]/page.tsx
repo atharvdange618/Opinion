@@ -178,9 +178,7 @@ function VotingForm({
 
   return (
     <form
-      onSubmit={handleSubmit((data) =>
-        onSubmit({ ...data, turnstileToken }),
-      )}
+      onSubmit={handleSubmit((data) => onSubmit({ ...data, turnstileToken }))}
       className="space-y-6"
     >
       {poll.questions.map((question, index) => (
@@ -214,7 +212,9 @@ function VotingForm({
 
       <Button
         type="submit"
-        disabled={isSubmitting || (poll.responseMode === "anonymous" && !turnstileToken)}
+        disabled={
+          isSubmitting || (poll.responseMode === "anonymous" && !turnstileToken)
+        }
         className="w-full"
         size="lg"
       >
@@ -250,7 +250,9 @@ function AuthRequiredScreen({ slug }: { slug: string }) {
         participate.
       </p>
       <Button className="mt-6" asChild>
-        <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/login?redirect=${encodeURIComponent(`/poll/${slug}`)}`}>
+        <a
+          href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/login?redirect=${encodeURIComponent(`/poll/${slug}`)}`}
+        >
           <LogIn className="mr-2 size-4" />
           Sign in to respond
         </a>
