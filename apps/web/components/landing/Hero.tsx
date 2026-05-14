@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowUpRight } from "@phosphor-icons/react";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { ArrowUpRight } from '@phosphor-icons/react';
 import {
   BarChart,
   Bar,
@@ -13,22 +13,22 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
-} from "recharts";
+} from 'recharts';
 
 const chartData = [
-  { option: "Turborepo", votes: 58 },
-  { option: "Nx", votes: 42 },
-  { option: "pnpm workspaces", votes: 40 },
-  { option: "Lerna", votes: 28 },
-  { option: "Rush", votes: 26 },
+  { option: 'Turborepo', votes: 58 },
+  { option: 'Nx', votes: 42 },
+  { option: 'pnpm workspaces', votes: 40 },
+  { option: 'Lerna', votes: 28 },
+  { option: 'Rush', votes: 26 },
 ];
 
 const CHART_COLORS = [
-  "var(--color-chart-1)",
-  "var(--color-chart-2)",
-  "var(--color-chart-3)",
-  "var(--color-chart-4)",
-  "var(--color-chart-5)",
+  'var(--color-chart-1)',
+  'var(--color-chart-2)',
+  'var(--color-chart-3)',
+  'var(--color-chart-4)',
+  'var(--color-chart-5)',
 ];
 
 function ChartTooltip({
@@ -51,13 +51,7 @@ function ChartTooltip({
   return null;
 }
 
-export function Hero({
-  hasSession,
-  apiUrl,
-}: {
-  hasSession: boolean;
-  apiUrl: string;
-}) {
+export function Hero({ hasSession, apiUrl }: { hasSession: boolean; apiUrl: string }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -75,37 +69,31 @@ export function Hero({
         <div className="grid items-end gap-16 lg:grid-cols-2">
           <div
             className={`transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              mounted ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+              mounted ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
             }`}
           >
             <h1 className="font-heading text-[clamp(2.8rem,5.5vw,4.5rem)] leading-[1.05] tracking-tight text-foreground">
-              Ask anonymously.{" "}
-              <span className="text-primary">Get honest answers.</span>
+              Ask anonymously. <span className="text-primary">Get honest answers.</span>
             </h1>
             <p
               className={`mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground transition-all delay-200 duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                mounted
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-8 opacity-0"
+                mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               }`}
             >
-              Create polls, share them with a link, and watch responses come in
-              live. Anonymous or authenticated, anti-spam protected, real-time
-              analytics.
+              Create polls, share them with a link, and watch responses come in live. Anonymous or
+              authenticated, anti-spam protected, real-time analytics.
             </p>
             <div
               className={`mt-10 flex flex-wrap items-center gap-4 transition-all delay-[400ms] duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                mounted
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-8 opacity-0"
+                mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               }`}
             >
               <Button size="lg" asChild className="group/btn">
                 <Link
                   href={
                     hasSession
-                      ? "/polls/create"
-                      : `${apiUrl}/api/auth/login?redirect=${encodeURIComponent("https://opinion.atharvdangedev.in/polls/create")}`
+                      ? '/polls/create'
+                      : `${apiUrl}/api/auth/login?redirect=${encodeURIComponent('https://opinion.atharvdangedev.in/polls/create')}`
                   }
                 >
                   <span className="flex items-center">
@@ -117,10 +105,8 @@ export function Hero({
                 </Link>
               </Button>
               <Button variant="ghost" size="lg" asChild>
-                <Link
-                  href={hasSession ? "/dashboard" : `${apiUrl}/api/auth/login`}
-                >
-                  {hasSession ? "Go to dashboard" : "Sign in"}
+                <Link href={hasSession ? '/dashboard' : `${apiUrl}/api/auth/login`}>
+                  {hasSession ? 'Go to dashboard' : 'Sign in'}
                 </Link>
               </Button>
             </div>
@@ -129,8 +115,8 @@ export function Hero({
           <div
             className={`hidden lg:block transition-all delay-300 duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
               mounted
-                ? "translate-y-0 scale-100 opacity-100"
-                : "translate-y-16 scale-[0.95] opacity-0"
+                ? 'translate-y-0 scale-100 opacity-100'
+                : 'translate-y-16 scale-[0.95] opacity-0'
             }`}
           >
             <div className="rounded-[2rem] bg-black/[0.03] p-[5px] ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
@@ -160,7 +146,7 @@ export function Hero({
                         tickLine={false}
                         tick={{
                           fontSize: 12,
-                          fill: "var(--color-muted-foreground)",
+                          fill: 'var(--color-muted-foreground)',
                         }}
                       />
                       <YAxis
@@ -168,19 +154,13 @@ export function Hero({
                         tickLine={false}
                         tick={{
                           fontSize: 11,
-                          fill: "var(--color-muted-foreground)",
+                          fill: 'var(--color-muted-foreground)',
                         }}
                       />
-                      <Tooltip
-                        content={<ChartTooltip />}
-                        cursor={{ opacity: 0.08 }}
-                      />
+                      <Tooltip content={<ChartTooltip />} cursor={{ opacity: 0.08 }} />
                       <Bar dataKey="votes" radius={[6, 6, 0, 0]}>
                         {chartData.map((_, i) => (
-                          <Cell
-                            key={i}
-                            fill={CHART_COLORS[i % CHART_COLORS.length]}
-                          />
+                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                         ))}
                       </Bar>
                     </BarChart>

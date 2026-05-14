@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { SignOut } from "@/components/auth/SignOut";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BrandLogo } from "@/components/layout/BrandLogo";
+import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { SignOut } from '@/components/auth/SignOut';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { BrandLogo } from '@/components/layout/BrandLogo';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { BarChart3, Plus } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { BarChart3, Plus } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export function GlobalNav() {
   const { isLoaded, isSignedIn, user } = useAuth();
@@ -47,17 +47,11 @@ export function GlobalNav() {
               <ThemeToggle />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="ml-1 rounded-full"
-                  >
+                  <Button variant="ghost" size="icon" className="ml-1 rounded-full">
                     <Avatar className="size-8">
                       <AvatarImage src={user?.picture} alt={user?.name} />
                       <AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
-                        {user?.name
-                          ? user.name.trim().charAt(0).toUpperCase()
-                          : "U"}
+                        {user?.name ? user.name.trim().charAt(0).toUpperCase() : 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -65,9 +59,7 @@ export function GlobalNav() {
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="border-b px-2 py-1.5">
                     <p className="text-sm font-medium">{user?.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {user?.email}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
                   </div>
                   <SignOut />
                 </DropdownMenuContent>
@@ -81,7 +73,7 @@ export function GlobalNav() {
               </Button>
               <Button size="sm" asChild>
                 <Link
-                  href={`${API_URL}/api/auth/login?redirect=${encodeURIComponent("/polls/create")}`}
+                  href={`${API_URL}/api/auth/login?redirect=${encodeURIComponent('/polls/create')}`}
                 >
                   Get started
                 </Link>

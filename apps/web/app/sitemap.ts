@@ -1,23 +1,23 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: "https://opinion.atharvdangedev.in",
+      url: 'https://opinion.atharvdangedev.in',
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
-      url: "https://opinion.atharvdangedev.in/privacy",
+      url: 'https://opinion.atharvdangedev.in/privacy',
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.3,
     },
     {
-      url: "https://opinion.atharvdangedev.in/terms",
+      url: 'https://opinion.atharvdangedev.in/terms',
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.3,
     },
   ];

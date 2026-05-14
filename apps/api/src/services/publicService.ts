@@ -1,20 +1,20 @@
-import crypto from "crypto";
-import mongoose from "mongoose";
-import { Request } from "express";
-import { Poll } from "../models/Poll.js";
-import { Question } from "../models/Question.js";
-import { Response as ResponseModel } from "../models/Response.js";
-import { User } from "../models/User.js";
+import crypto from 'crypto';
+import mongoose from 'mongoose';
+import { Request } from 'express';
+import { Poll } from '../models/Poll.js';
+import { Question } from '../models/Question.js';
+import { Response as ResponseModel } from '../models/Response.js';
+import { User } from '../models/User.js';
 import {
   BadRequestError,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
-} from "../lib/errors.js";
-import type { AuthPayload } from "../middleware/auth.js";
+} from '../lib/errors.js';
+import type { AuthPayload } from '../middleware/auth.js';
+import { checkVerification } from './verifyService.js';
 
-const TURNSTILE_VERIFY_URL =
-  "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
 async function verifyTurnstileToken(token: string): Promise<boolean> {
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
@@ -22,8 +22,8 @@ async function verifyTurnstileToken(token: string): Promise<boolean> {
 
   try {
     const res = await fetch(TURNSTILE_VERIFY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ secret: secretKey, response: token }),
     });
     const data = (await res.json()) as { success: boolean };
@@ -34,36 +34,36 @@ async function verifyTurnstileToken(token: string): Promise<boolean> {
 }
 
 function hashFingerprint(ip: string): string {
-  const salt = process.env.FINGERPRINT_SALT || "default-salt";
+  const salt = process.env.FINGERPRINT_SALT || 'default-salt';
   return crypto
-    .createHash("sha256")
+    .createHash('sha256')
     .update(ip + salt)
-    .digest("hex");
+    .digest('hex');
 }
 
 function getClientIp(req: Request): string {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
-  return req.ip || req.socket.remoteAddress || "unknown";
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') return forwarded.split(',')[0].trim();
+  return req.ip || req.socket.remoteAddress || 'unknown';
 }
 
 async function checkExpiry(pollId: mongoose.Types.ObjectId) {
   const poll = await Poll.findById(pollId);
   if (!poll) return;
   const now = new Date();
-  if (poll.status === "active" && now > poll.expiresAt) {
-    poll.status = "expired";
+  if (poll.status === 'active' && now > poll.expiresAt) {
+    poll.status = 'expired';
     await poll.save();
   }
 }
 
 export async function getPublicPoll(slug: string) {
   const poll = await Poll.findOne({ slug });
-  if (!poll) throw new NotFoundError("Poll not found");
+  if (!poll) throw new NotFoundError('Poll not found');
 
   await checkExpiry(poll._id);
 
-  if (poll.status === "published" || poll.status === "expired") {
+  if (poll.status === 'published' || poll.status === 'expired') {
     const questions = await Question.find({ poll: poll._id }).sort({
       order: 1,
     });
@@ -94,10 +94,10 @@ export async function getPublicPoll(slug: string) {
 
 export async function getPublicResults(slug: string) {
   const poll = await Poll.findOne({ slug });
-  if (!poll) throw new NotFoundError("Poll not found");
+  if (!poll) throw new NotFoundError('Poll not found');
 
-  if (poll.status !== "published") {
-    throw new ForbiddenError("Results have not been published yet");
+  if (poll.status !== 'published') {
+    throw new ForbiddenError('Results have not been published yet');
   }
 
   const questions = await Question.find({ poll: poll._id }).sort({ order: 1 });
@@ -113,14 +113,11 @@ export async function getPublicResults(slug: string) {
       const totalAnswers = responses.length;
 
       const optionCounts = question.options.map((option) => {
-        const count = responses.filter(
-          (r) => r.selectedOption === option,
-        ).length;
+        const count = responses.filter((r) => r.selectedOption === option).length;
         return {
           option,
           count,
-          percentage:
-            totalAnswers > 0 ? Math.round((count / totalAnswers) * 100) : 0,
+          percentage: totalAnswers > 0 ? Math.round((count / totalAnswers) * 100) : 0,
         };
       });
 
@@ -144,17 +141,17 @@ export async function submitResponse(
   userInfo?: AuthPayload,
 ) {
   const poll = await Poll.findOne({ slug });
-  if (!poll) throw new NotFoundError("Poll not found");
+  if (!poll) throw new NotFoundError('Poll not found');
 
   const now = new Date();
-  if (poll.status === "expired" || now > poll.expiresAt) {
-    poll.status = "expired";
+  if (poll.status === 'expired' || now > poll.expiresAt) {
+    poll.status = 'expired';
     await poll.save();
-    throw new BadRequestError("This poll has ended");
+    throw new BadRequestError('This poll has ended');
   }
 
-  if (poll.status !== "active") {
-    throw new BadRequestError("This poll is not accepting responses");
+  if (poll.status !== 'active') {
+    throw new BadRequestError('This poll is not accepting responses');
   }
 
   const questions = await Question.find({ poll: poll._id }).sort({ order: 1 });
@@ -164,20 +161,14 @@ export async function submitResponse(
 
   for (const q of mandatoryQuestions) {
     if (!answeredQuestionIds.includes(q._id.toString())) {
-      throw new BadRequestError(
-        `Mandatory question "${q.text}" is not answered`,
-      );
+      throw new BadRequestError(`Mandatory question "${q.text}" is not answered`);
     }
   }
 
   for (const answer of answers) {
-    const question = questions.find(
-      (q) => q._id.toString() === answer.questionId,
-    );
+    const question = questions.find((q) => q._id.toString() === answer.questionId);
     if (!question) {
-      throw new BadRequestError(
-        `Question ${answer.questionId} not found in this poll`,
-      );
+      throw new BadRequestError(`Question ${answer.questionId} not found in this poll`);
     }
     if (!question.options.includes(answer.selectedOption)) {
       throw new BadRequestError(
@@ -186,9 +177,13 @@ export async function submitResponse(
     }
   }
 
-  if (poll.responseMode === "anonymous") {
-    if (!turnstileToken || !(await verifyTurnstileToken(turnstileToken))) {
-      throw new BadRequestError("Security check failed. Please try again.");
+  if (poll.responseMode === 'anonymous') {
+    const verifiedCookie = req.cookies?.[`poll_verified_${slug}`];
+    const hasVerifiedSession = await checkVerification(slug, verifiedCookie);
+    const hasFreshTurnstileToken = !!turnstileToken && (await verifyTurnstileToken(turnstileToken));
+
+    if (!hasVerifiedSession && !hasFreshTurnstileToken) {
+      throw new BadRequestError('Security check failed. Please try again.');
     }
 
     const ip = getClientIp(req);
@@ -201,7 +196,7 @@ export async function submitResponse(
       respondentId,
     });
     if (existing) {
-      throw new BadRequestError("You have already responded to this poll");
+      throw new BadRequestError('You have already responded to this poll');
     }
 
     const responseDocs = answers.map((a) => ({
@@ -220,18 +215,18 @@ export async function submitResponse(
 
   // authenticated mode
   if (!userInfo) {
-    throw new UnauthorizedError("Authentication required for this poll");
+    throw new UnauthorizedError('Authentication required for this poll');
   }
 
   const user = await User.findOne({ sub: userInfo.sub });
-  if (!user) throw new NotFoundError("User not found");
+  if (!user) throw new NotFoundError('User not found');
 
   const existing = await ResponseModel.findOne({
     poll: poll._id,
     respondent: user._id,
   });
   if (existing) {
-    throw new BadRequestError("You have already responded to this poll");
+    throw new BadRequestError('You have already responded to this poll');
   }
 
   const responseDocs = answers.map((a) => ({

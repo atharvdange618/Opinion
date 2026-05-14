@@ -86,8 +86,8 @@ pnpm build
 
 Produces:
 
-- `apps/api/dist/` — compiled Express server
-- `apps/web/.next/` — Next.js production bundle
+- `apps/api/dist/` - compiled Express server
+- `apps/web/.next/` - Next.js production bundle
 
 ---
 
@@ -107,10 +107,10 @@ npm install -g pm2
 module.exports = {
   apps: [
     {
-      name: "opinion-api",
-      cwd: "./apps/api",
-      script: "dist/index.js",
-      env: { NODE_ENV: "production" },
+      name: 'opinion-api',
+      cwd: './apps/api',
+      script: 'dist/index.js',
+      env: { NODE_ENV: 'production' },
     },
   ],
 };
@@ -122,11 +122,11 @@ module.exports = {
 module.exports = {
   apps: [
     {
-      name: "opinion-web",
-      cwd: "./apps/web",
-      script: "node_modules/next/dist/bin/next",
-      args: "start -p 3002",
-      env: { NODE_ENV: "production" },
+      name: 'opinion-web',
+      cwd: './apps/web',
+      script: 'node_modules/next/dist/bin/next',
+      args: 'start -p 3002',
+      env: { NODE_ENV: 'production' },
     },
   ],
 };
@@ -156,7 +156,7 @@ Since you're using PM2, **do NOT enable** the Node.js manager in CloudPanel for 
 
 ---
 
-## 6. nginx — Each site proxies to its own process
+## 6. nginx - Each site proxies to its own process
 
 ### On `opinion.atharvdangedev.in`
 
@@ -235,7 +235,7 @@ sudo apt update && sudo apt install -y mongodb-org
 sudo systemctl enable --now mongod
 ```
 
-Or use MongoDB Atlas — just set `MONGODB_URI` to your Atlas connection string in the API's `.env`.
+Or use MongoDB Atlas - just set `MONGODB_URI` to your Atlas connection string in the API's `.env`.
 
 ---
 
@@ -293,9 +293,9 @@ pm2 restart ecosystem.config.js
 | Symptom                        | Cause & Fix                                                                                                 |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | `502 Bad Gateway`              | PM2 not running. Run `pm2 start ecosystem.config.js`                                                        |
-| CORS errors in browser         | Check `CORS_ORIGIN` in API `.env` — must be `https://opinion.atharvdangedev.in`                             |
-| Auth callback fails            | Check Kleiss client config — redirect URI must be `https://api-opinion.atharvdangedev.in/api/auth/callback` |
+| CORS errors in browser         | Check `CORS_ORIGIN` in API `.env` - must be `https://opinion.atharvdangedev.in`                             |
+| Auth callback fails            | Check Kleiss client config - redirect URI must be `https://api-opinion.atharvdangedev.in/api/auth/callback` |
 | Socket.io not connecting       | `NEXT_PUBLIC_API_URL` must be `https://api-opinion.atharvdangedev.in` in web `.env.local`                   |
 | Session not persisting         | Cookie `SameSite=None` requires HTTPS. Both subdomains must have valid SSL certificates                     |
 | `pnpm: command not found`      | Run `corepack enable && corepack prepare pnpm@10.32.1 --activate` as the site user                          |
-| Login redirects to wrong place | Check `PUBLIC_FRONTEND_URL` in API `.env` — must be `https://opinion.atharvdangedev.in`                     |
+| Login redirects to wrong place | Check `PUBLIC_FRONTEND_URL` in API `.env` - must be `https://opinion.atharvdangedev.in`                     |

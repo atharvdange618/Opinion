@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useInView } from "@/hooks/useInView";
-import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
+import { useState } from 'react';
+import { useInView } from '@/hooks/useInView';
+import { cn } from '@/lib/utils';
+import { ChevronDown } from 'lucide-react';
 
 const faqs = [
   {
-    q: "Is it really anonymous?",
+    q: 'Is it really anonymous?',
     a: "Yes. In anonymous mode, respondents don't need to sign in or provide any personal information. A random cookie prevents duplicate votes, but it's not linked to any identity. If you need verified responses, switch to authenticated mode instead.",
   },
   {
-    q: "How do you prevent spam and bots?",
+    q: 'How do you prevent spam and bots?',
     a: "We use Cloudflare Turnstile for invisible bot detection, SHA-256 fingerprinting to detect duplicate submissions from the same device, and respondent cookies as a final deduplication layer. No CAPTCHA puzzles - it's seamless for real users.",
   },
   {
-    q: "Do respondents need to install anything?",
-    a: "Not at all. Respondents just open the link in any browser. No app, no account, no sign-up required. It works on desktop and mobile.",
+    q: 'Do respondents need to install anything?',
+    a: 'Not at all. Respondents just open the link in any browser. No app, no account, no sign-up required. It works on desktop and mobile.',
   },
   {
-    q: "Can I control when a poll closes?",
+    q: 'Can I control when a poll closes?',
     a: "Yes. Every poll has an optional expiry date. Once it passes, the poll auto-closes and stops accepting responses. You can also publish results manually whenever you're ready.",
   },
   {
-    q: "Who can see the results?",
+    q: 'Who can see the results?',
     a: "By default only you (the poll creator) can see results on the analytics dashboard. When you're ready, you can publish results so respondents can view them too.",
   },
 ];
@@ -45,26 +45,22 @@ function FaqItem({
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between gap-4 py-5 text-left transition-colors hover:text-foreground"
       >
-        <span className="font-heading text-base font-medium text-foreground">
-          {question}
-        </span>
+        <span className="font-heading text-base font-medium text-foreground">{question}</span>
         <ChevronDown
           className={cn(
-            "size-4 shrink-0 text-muted-foreground transition-transform duration-300",
-            open && "rotate-180",
+            'size-4 shrink-0 text-muted-foreground transition-transform duration-300',
+            open && 'rotate-180',
           )}
         />
       </button>
       <div
         className={cn(
-          "grid transition-all duration-300 ease-in-out",
-          open ? "grid-rows-[1fr] pb-5" : "grid-rows-[0fr]",
+          'grid transition-all duration-300 ease-in-out',
+          open ? 'grid-rows-[1fr] pb-5' : 'grid-rows-[0fr]',
         )}
       >
         <div className="overflow-hidden">
-          <p className="text-base leading-relaxed text-muted-foreground">
-            {answer}
-          </p>
+          <p className="text-base leading-relaxed text-muted-foreground">{answer}</p>
         </div>
       </div>
     </div>
@@ -79,13 +75,11 @@ export function FAQ() {
       <div className="mx-auto max-w-6xl">
         <div
           className={cn(
-            "mb-16 max-w-xl transition-all duration-1000 ease-out",
-            inView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+            'mb-16 max-w-xl transition-all duration-1000 ease-out',
+            inView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
           )}
         >
-          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-primary">
-            FAQ
-          </p>
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-primary">FAQ</p>
           <h2 className="font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Questions? We&apos;ve got answers.
           </h2>
@@ -96,8 +90,8 @@ export function FAQ() {
 
         <div
           className={cn(
-            "mx-auto rounded-2xl border border-border/30 bg-card px-6 sm:px-10 transition-all duration-1000 ease-out",
-            inView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+            'mx-auto rounded-2xl border border-border/30 bg-card px-6 sm:px-10 transition-all duration-1000 ease-out',
+            inView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
           )}
         >
           {faqs.map((faq) => (

@@ -1,3 +1,3 @@
-"use client";
+'use client';
 
-export { useAuth } from "@/components/auth/AuthProvider";
+export { useAuth } from '@/components/auth/AuthProvider';

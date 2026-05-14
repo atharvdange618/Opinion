@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   BarChart,
@@ -11,7 +11,7 @@ import {
   Area,
   CartesianGrid,
   Cell,
-} from "recharts";
+} from 'recharts';
 
 export {
   BarChart,

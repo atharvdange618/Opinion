@@ -1,32 +1,29 @@
-"use client";
+'use client';
 
-import { useInView } from "@/hooks/useInView";
-import { BarChart3, Share2, Eye } from "lucide-react";
+import { useInView } from '@/hooks/useInView';
+import { BarChart3, Share2, Eye } from 'lucide-react';
 
 const features = [
   {
     icon: BarChart3,
-    title: "Real-time analytics",
-    description:
-      "Watch responses come in live. See charts and insights as they happen.",
-    className: "sm:col-span-2 lg:col-span-1",
-    iconBg: "bg-primary/10 text-primary",
+    title: 'Real-time analytics',
+    description: 'Watch responses come in live. See charts and insights as they happen.',
+    className: 'sm:col-span-2 lg:col-span-1',
+    iconBg: 'bg-primary/10 text-primary',
   },
   {
     icon: Share2,
-    title: "Share with a link",
-    description:
-      "One link is all you need. Share it anywhere - email, social, or embed.",
-    className: "",
-    iconBg: "bg-secondary text-secondary-foreground",
+    title: 'Share with a link',
+    description: 'One link is all you need. Share it anywhere - email, social, or embed.',
+    className: '',
+    iconBg: 'bg-secondary text-secondary-foreground',
   },
   {
     icon: Eye,
-    title: "Flexible privacy",
-    description:
-      "Anonymous or authenticated responses. You control who participates.",
-    className: "",
-    iconBg: "bg-accent text-accent-foreground",
+    title: 'Flexible privacy',
+    description: 'Anonymous or authenticated responses. You control who participates.',
+    className: '',
+    iconBg: 'bg-accent text-accent-foreground',
   },
 ];
 
@@ -39,14 +36,14 @@ export function AnimatedFeatures() {
       <div className="mx-auto max-w-5xl">
         <h2
           className={`text-center font-heading text-3xl font-semibold transition-all duration-1000 ease-out ${
-            inView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            inView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
           }`}
         >
           Everything you need
         </h2>
         <p
           className={`mt-2 text-center text-muted-foreground transition-all delay-150 duration-1000 ease-out ${
-            inView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            inView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
           }`}
         >
           Create engaging polls in minutes
@@ -57,7 +54,7 @@ export function AnimatedFeatures() {
               key={feature.title}
               style={{ transitionDelay: `${(i + 1) * 200}ms` }}
               className={`rounded-xl border bg-card p-6 transition-all duration-1000 ease-out hover:-translate-y-1 hover:shadow-lg ${
-                inView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                inView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               } ${feature.className}`}
             >
               <div
@@ -66,9 +63,7 @@ export function AnimatedFeatures() {
                 <feature.icon className="size-5" />
               </div>
               <h3 className="mb-2 font-semibold">{feature.title}</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
+              <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
             </div>
           ))}
         </div>

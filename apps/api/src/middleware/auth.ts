@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import { createRemoteJWKSet, jwtVerify } from "jose";
-import { verifySessionJwt } from "../services/oidcService.js";
+import { Request, Response, NextFunction } from 'express';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { verifySessionJwt } from '../services/oidcService.js';
 
 let getKey: ReturnType<typeof createRemoteJWKSet> | null = null;
 
@@ -19,6 +19,7 @@ export interface AuthPayload {
   picture?: string;
 }
 
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
   namespace Express {
     interface Request {
@@ -26,12 +27,13 @@ declare global {
     }
   }
 }
+/* eslint-enable @typescript-eslint/no-namespace */
 
-const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "opinion_session";
+const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || 'opinion_session';
 
 async function resolveUser(req: Request): Promise<AuthPayload | null> {
   const header = req.headers.authorization;
-  if (header?.startsWith("Bearer ")) {
+  if (header?.startsWith('Bearer ')) {
     const token = header.slice(7);
     try {
       const key = initJwks();
@@ -58,14 +60,10 @@ async function resolveUser(req: Request): Promise<AuthPayload | null> {
   return null;
 }
 
-export async function requireAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   const user = await resolveUser(req);
   if (!user) {
-    res.status(401).json({ message: "Not authenticated" });
+    res.status(401).json({ message: 'Not authenticated' });
     return;
   }
   req.user = user;

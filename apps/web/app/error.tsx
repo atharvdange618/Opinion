@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { RotateCcw } from 'lucide-react';
 
 export default function ErrorPage({
   error,
@@ -12,7 +12,7 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   useEffect(() => {
-    document.title = "Error - Opinion";
+    document.title = 'Error - Opinion';
   }, []);
 
   return (
@@ -33,37 +33,14 @@ export default function ErrorPage({
             className="fill-destructive/10 stroke-destructive/30"
             strokeWidth="2"
           />
-          <rect
-            x="55"
-            y="55"
-            width="90"
-            height="6"
-            rx="3"
-            className="fill-destructive/30"
-          />
-          <rect
-            x="55"
-            y="75"
-            width="70"
-            height="6"
-            rx="3"
-            className="fill-destructive/20"
-          />
-          <rect
-            x="55"
-            y="95"
-            width="40"
-            height="6"
-            rx="3"
-            className="fill-destructive/20"
-          />
+          <rect x="55" y="55" width="90" height="6" rx="3" className="fill-destructive/30" />
+          <rect x="55" y="75" width="70" height="6" rx="3" className="fill-destructive/20" />
+          <rect x="55" y="95" width="40" height="6" rx="3" className="fill-destructive/20" />
           <path d="M100 10 L110 30 L90 30 Z" className="fill-warning/50" />
         </svg>
-        <h1 className="mt-6 font-heading text-3xl font-semibold">
-          Something went wrong
-        </h1>
+        <h1 className="mt-6 font-heading text-3xl font-semibold">Something went wrong</h1>
         <p className="mt-2 text-muted-foreground">
-          {error?.message || "An unexpected error occurred."}
+          {error?.message || 'An unexpected error occurred.'}
         </p>
         <Button className="mt-8" onClick={reset}>
           <RotateCcw className="mr-2 size-4" />

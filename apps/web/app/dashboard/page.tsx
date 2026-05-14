@@ -1,26 +1,16 @@
-"use client";
+'use client';
 
-import { useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { api } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyPolls } from "@/components/illustrations/EmptyPolls";
-import { Plus, BarChart3, Pencil, Users, ExternalLink } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+import { api } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyPolls } from '@/components/illustrations/EmptyPolls';
+import { Plus, BarChart3, Pencil, Users, ExternalLink } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PollSummary {
   _id: string;
@@ -35,13 +25,13 @@ interface PollSummary {
 
 export default function DashboardPage() {
   useEffect(() => {
-    document.title = "My Polls - Opinion";
+    document.title = 'My Polls - Opinion';
   }, []);
 
-  const { data: polls, isLoading } = useQuery({
-    queryKey: ["my-polls"],
+  const { data: polls, isLoading } = useQuery<PollSummary[]>({
+    queryKey: ['my-polls'],
     queryFn: async () => {
-      const { data } = await api.get<PollSummary[]>("/polls");
+      const { data } = await api.get('/polls');
       return data;
     },
   });
@@ -51,7 +41,7 @@ export default function DashboardPage() {
     return {
       total: polls.length,
       responses: polls.reduce((acc, p) => acc + p.responseCount, 0),
-      active: polls.filter((p) => p.status === "active").length,
+      active: polls.filter((p) => p.status === 'active').length,
     };
   }, [polls]);
 
@@ -59,9 +49,7 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="font-heading text-4xl font-semibold tracking-tight">
-            Dashboard
-          </h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">Dashboard</h1>
           <p className="mt-2 text-lg text-muted-foreground">
             Manage your polls and track feedback.
           </p>
@@ -130,9 +118,7 @@ export default function DashboardPage() {
               <EmptyPolls />
             </div>
             <div>
-              <CardTitle className="font-heading text-2xl">
-                No polls yet
-              </CardTitle>
+              <CardTitle className="font-heading text-2xl">No polls yet</CardTitle>
               <CardDescription className="mt-2 text-base">
                 Create your first poll to start collecting feedback.
               </CardDescription>
@@ -175,12 +161,7 @@ export default function DashboardPage() {
 
               <CardContent className="mt-auto border-t border-border/40 pt-4">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="flex-1"
-                    asChild
-                  >
+                  <Button variant="default" size="sm" className="flex-1" asChild>
                     <Link href={`/polls/${poll._id}/analytics`}>
                       <BarChart3 className="mr-1.5 size-3.5" />
                       Analytics
@@ -204,9 +185,7 @@ export default function DashboardPage() {
                         </Link>
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                      View public page
-                    </TooltipContent>
+                    <TooltipContent side="bottom">View public page</TooltipContent>
                   </Tooltip>
                 </div>
               </CardContent>

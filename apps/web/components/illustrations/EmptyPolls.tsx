@@ -16,30 +16,9 @@ export function EmptyPolls() {
         className="fill-primary/10 stroke-border"
         strokeWidth="2"
       />
-      <rect
-        x="50"
-        y="45"
-        width="100"
-        height="6"
-        rx="3"
-        className="fill-primary/30"
-      />
-      <rect
-        x="50"
-        y="65"
-        width="80"
-        height="6"
-        rx="3"
-        className="fill-muted-foreground/20"
-      />
-      <rect
-        x="50"
-        y="85"
-        width="70"
-        height="6"
-        rx="3"
-        className="fill-muted-foreground/20"
-      />
+      <rect x="50" y="45" width="100" height="6" rx="3" className="fill-primary/30" />
+      <rect x="50" y="65" width="80" height="6" rx="3" className="fill-muted-foreground/20" />
+      <rect x="50" y="85" width="70" height="6" rx="3" className="fill-muted-foreground/20" />
       <path
         d="M160 120 L180 140 M180 120 L160 140"
         stroke="currentColor"

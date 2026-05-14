@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { use, useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { getSocket } from "@/lib/socket";
+import { use, useEffect, useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { getSocket } from '@/lib/socket';
 import {
   BarChart,
   Bar,
@@ -15,11 +15,11 @@ import {
   Area,
   CartesianGrid,
   Cell,
-} from "@/components/Charts";
-import type { AnalyticsData } from "@opinion/shared";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
+} from '@/components/Charts';
+import type { AnalyticsData } from '@opinion/shared';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 import {
   Copy,
   ShareNetwork,
@@ -32,45 +32,41 @@ import {
   ActivityIcon,
   ShieldCheck,
   Shield,
-} from "@phosphor-icons/react";
+} from '@phosphor-icons/react';
 
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const HOURS = Array.from({ length: 24 }, (_, i) => {
   const h = i % 12 || 12;
   return i < 12 ? `${h}AM` : `${h}PM`;
 });
 
 function formatHoursAgo(hours: number): string {
-  if (hours < 1) return "< 1h ago";
+  if (hours < 1) return '< 1h ago';
   if (hours < 24) return `${Math.round(hours)}h ago`;
   const days = Math.floor(hours / 24);
-  return days === 1 ? "1 day ago" : `${days} days ago`;
+  return days === 1 ? '1 day ago' : `${days} days ago`;
 }
 
 const CHART_COLORS = [
-  "var(--color-chart-1)",
-  "var(--color-chart-2)",
-  "var(--color-chart-3)",
-  "var(--color-chart-4)",
-  "var(--color-chart-5)",
+  'var(--color-chart-1)',
+  'var(--color-chart-2)',
+  'var(--color-chart-3)',
+  'var(--color-chart-4)',
+  'var(--color-chart-5)',
 ];
 
-export default function AnalyticsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function AnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const queryClient = useQueryClient();
   const [publishing, setPublishing] = useState(false);
   const [copying, setCopying] = useState(false);
 
   useEffect(() => {
-    document.title = "Analytics - Opinion";
+    document.title = 'Analytics - Opinion';
   }, []);
 
   const { data: analytics, isLoading } = useQuery({
-    queryKey: ["analytics", id],
+    queryKey: ['analytics', id],
     queryFn: async () => {
       const { data } = await api.get<AnalyticsData>(`/polls/${id}/analytics`);
       return data;
@@ -78,7 +74,7 @@ export default function AnalyticsPage({
   });
 
   const { data: poll } = useQuery({
-    queryKey: ["poll", id],
+    queryKey: ['poll', id],
     queryFn: async () => {
       const { data } = await api.get(`/polls/${id}`);
       return data;
@@ -87,15 +83,15 @@ export default function AnalyticsPage({
 
   useEffect(() => {
     const socket = getSocket();
-    socket.emit("join:poll", id);
+    socket.emit('join:poll', id);
 
-    socket.on("analytics:update", () => {
-      queryClient.invalidateQueries({ queryKey: ["analytics", id] });
+    socket.on('analytics:update', () => {
+      void queryClient.invalidateQueries({ queryKey: ['analytics', id] });
     });
 
     return () => {
-      socket.emit("leave:poll", id);
-      socket.off("analytics:update");
+      socket.emit('leave:poll', id);
+      socket.off('analytics:update');
     };
   }, [id, queryClient]);
 
@@ -103,36 +99,50 @@ export default function AnalyticsPage({
     setPublishing(true);
     try {
       await api.put(`/polls/${id}/publish`);
-      queryClient.invalidateQueries({ queryKey: ["poll", id] });
-      toast.success("Results published");
+      void queryClient.invalidateQueries({ queryKey: ['poll', id] });
+      toast.success('Results published');
     } catch {
-      toast.error("Failed to publish");
+      toast.error('Failed to publish');
     } finally {
       setPublishing(false);
     }
   }
 
-  async function handleCopyLink() {
+  function handleCopyLink() {
     if (!poll?.slug) return;
     setCopying(true);
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/poll/${poll.slug}`,
+
+    const url = `${window.location.origin}/poll/${poll.slug}`;
+
+    function done(success: boolean) {
+      if (success) {
+        toast.success('Link copied to clipboard');
+      } else {
+        toast.error('Failed to copy link');
+      }
+      setTimeout(() => setCopying(false), 1200);
+    }
+
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(
+        () => done(true),
+        () => done(false),
       );
-      toast.success("Link copied to clipboard");
-    } catch {
-      toast.error("Failed to copy link");
-    } finally {
-      setCopying(false);
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      done(document.execCommand('copy'));
+      document.body.removeChild(textarea);
     }
   }
 
   const anonPercent = useMemo(() => {
     if (!analytics || analytics.totalResponses === 0) return 0;
-    return Math.round(
-      (analytics.participationInsights.anonymous / analytics.totalResponses) *
-        100,
-    );
+    return Math.round((analytics.participationInsights.anonymous / analytics.totalResponses) * 100);
   }, [analytics]);
 
   const authPercent = 100 - anonPercent;
@@ -141,22 +151,19 @@ export default function AnalyticsPage({
   const peakDay = analytics?.engagement.peakActivity.dayOfWeek ?? null;
   const peakTime =
     peakHour !== null
-      ? `${HOURS[peakHour]}${peakDay !== null ? " on " + DAYS[peakDay] : ""}`
+      ? `${HOURS[peakHour]}${peakDay !== null ? ' on ' + DAYS[peakDay] : ''}`
       : null;
 
   const totalQuestions = analytics?.questionSummaries.length ?? 0;
   const maxVotes = analytics?.pollHealth.votesPerQuestion
-    ? Math.max(
-        ...analytics.pollHealth.votesPerQuestion.map((q) => q.totalAnswers),
-      )
+    ? Math.max(...analytics.pollHealth.votesPerQuestion.map((q) => q.totalAnswers))
     : 0;
 
   const dropOff =
     totalQuestions > 1 && maxVotes > 0
       ? Math.round(
           ((maxVotes -
-            (analytics?.pollHealth.votesPerQuestion?.[totalQuestions - 1]
-              ?.totalAnswers ?? 0)) /
+            (analytics?.pollHealth.votesPerQuestion?.[totalQuestions - 1]?.totalAnswers ?? 0)) /
             maxVotes) *
             100,
         )
@@ -182,15 +189,13 @@ export default function AnalyticsPage({
       <header className="mb-16 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <h1 className="font-heading text-4xl font-semibold tracking-tight">
-            {poll?.title || "Poll Analytics"}
+            {poll?.title || 'Poll Analytics'}
           </h1>
           <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span
                 className={`size-1.5 rounded-full ${
-                  poll?.status === "active"
-                    ? "bg-success"
-                    : "bg-muted-foreground"
+                  poll?.status === 'active' ? 'bg-success' : 'bg-muted-foreground'
                 }`}
               />
               {poll?.status}
@@ -214,10 +219,10 @@ export default function AnalyticsPage({
             )}
             Copy link
           </Button>
-          {poll?.status !== "published" && (
-            <Button onClick={handlePublish} disabled={publishing}>
+          {poll?.status !== 'published' && (
+            <Button onClick={() => { void handlePublish(); }} disabled={publishing}>
               <ShareNetwork className="mr-2 size-4" weight="bold" />
-              {publishing ? "Publishing" : "Publish results"}
+              {publishing ? 'Publishing' : 'Publish results'}
             </Button>
           )}
         </div>
@@ -240,8 +245,7 @@ export default function AnalyticsPage({
               </span>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <ShieldCheck weight="bold" className="size-3" />
-                {analytics?.participationInsights.authenticated ?? 0}{" "}
-                authenticated
+                {analytics?.participationInsights.authenticated ?? 0} authenticated
               </span>
             </div>
             {analytics && analytics.totalResponses > 0 && (
@@ -264,11 +268,7 @@ export default function AnalyticsPage({
               Peak activity
             </p>
             <p className="mt-2 font-heading text-3xl font-semibold tabular-nums text-foreground">
-              {peakTime ?? (
-                <span className="text-base font-normal text-muted-foreground">
-                  N/A
-                </span>
-              )}
+              {peakTime ?? <span className="text-base font-normal text-muted-foreground">N/A</span>}
             </p>
             {analytics?.engagement.uniqueRespondents !== undefined && (
               <p className="mt-4 text-xs text-muted-foreground">
@@ -283,7 +283,7 @@ export default function AnalyticsPage({
               Duration
             </p>
             <p className="mt-2 font-heading text-3xl font-semibold tabular-nums text-foreground">
-              {analytics?.pollHealth.pollDuration ?? "-"}
+              {analytics?.pollHealth.pollDuration ?? '-'}
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
               {formatHoursAgo(analytics?.pollHealth.pollDurationHours ?? 0)}
@@ -299,20 +299,14 @@ export default function AnalyticsPage({
               {dropOff !== null ? (
                 <>
                   {dropOff}
-                  <span className="ml-0.5 text-base font-normal text-muted-foreground">
-                    %
-                  </span>
+                  <span className="ml-0.5 text-base font-normal text-muted-foreground">%</span>
                 </>
               ) : (
-                <span className="text-base font-normal text-muted-foreground">
-                  N/A
-                </span>
+                <span className="text-base font-normal text-muted-foreground">N/A</span>
               )}
             </p>
             {dropOff !== null && (
-              <p className="mt-4 text-xs text-muted-foreground">
-                Q1 → Q{totalQuestions}
-              </p>
+              <p className="mt-4 text-xs text-muted-foreground">Q1 → Q{totalQuestions}</p>
             )}
           </div>
         </div>
@@ -326,9 +320,7 @@ export default function AnalyticsPage({
                 <h2 className="font-heading text-lg font-semibold text-foreground">
                   Responses over time
                 </h2>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  Daily response volume
-                </p>
+                <p className="mt-0.5 text-sm text-muted-foreground">Daily response volume</p>
               </div>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Eye weight="bold" className="size-3" />
@@ -342,23 +334,9 @@ export default function AnalyticsPage({
                   margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
                 >
                   <defs>
-                    <linearGradient
-                      id="timelineFill"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="0%"
-                        stopColor="var(--color-chart-1)"
-                        stopOpacity={0.2}
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor="var(--color-chart-1)"
-                        stopOpacity={0}
-                      />
+                    <linearGradient id="timelineFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--color-chart-1)" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="var(--color-chart-1)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
@@ -370,7 +348,7 @@ export default function AnalyticsPage({
                   <XAxis
                     dataKey="date"
                     tick={{
-                      fill: "currentColor",
+                      fill: 'currentColor',
                       opacity: 0.4,
                       fontSize: 12,
                     }}
@@ -380,7 +358,7 @@ export default function AnalyticsPage({
                   />
                   <YAxis
                     tick={{
-                      fill: "currentColor",
+                      fill: 'currentColor',
                       opacity: 0.4,
                       fontSize: 12,
                     }}
@@ -391,15 +369,15 @@ export default function AnalyticsPage({
                   />
                   <Tooltip
                     cursor={{
-                      stroke: "var(--color-border)",
+                      stroke: 'var(--color-border)',
                       strokeOpacity: 0.6,
                     }}
                     contentStyle={{
-                      borderRadius: "8px",
-                      border: "1px solid var(--color-border)",
-                      backgroundColor: "var(--color-card)",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                      fontSize: "13px",
+                      borderRadius: '8px',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: 'var(--color-card)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                      fontSize: '13px',
                     }}
                   />
                   <Area
@@ -416,123 +394,113 @@ export default function AnalyticsPage({
         </section>
       )}
 
-      {analytics?.questionSummaries &&
-        analytics.questionSummaries.length > 0 && (
-          <section>
-            <h2 className="mb-8 font-heading text-lg font-semibold text-foreground">
-              Question breakdown
-            </h2>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              {analytics.questionSummaries.map((summary, idx) => {
-                const winner = summary.options.reduce((a, b) =>
-                  a.count > b.count ? a : b,
-                );
-                const winnerPercent =
-                  summary.totalAnswers > 0
-                    ? Math.round((winner.count / summary.totalAnswers) * 100)
-                    : 0;
+      {analytics?.questionSummaries && analytics.questionSummaries.length > 0 && (
+        <section>
+          <h2 className="mb-8 font-heading text-lg font-semibold text-foreground">
+            Question breakdown
+          </h2>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {analytics.questionSummaries.map((summary, idx) => {
+              const winner = summary.options.reduce((a, b) => (a.count > b.count ? a : b));
+              const winnerPercent =
+                summary.totalAnswers > 0
+                  ? Math.round((winner.count / summary.totalAnswers) * 100)
+                  : 0;
 
-                const isLastOdd =
-                  idx === analytics.questionSummaries.length - 1 &&
-                  analytics.questionSummaries.length % 2 === 1;
+              const isLastOdd =
+                idx === analytics.questionSummaries.length - 1 &&
+                analytics.questionSummaries.length % 2 === 1;
 
-                return (
-                  <div
-                    key={summary.questionId}
-                    className={`rounded-2xl border border-border/40 bg-card p-8 ${
-                      isLastOdd ? "lg:col-span-2" : ""
-                    }`}
-                  >
-                    <div className="mb-6">
-                      <h3 className="font-heading text-base font-semibold leading-snug text-foreground">
-                        {summary.questionText}
-                      </h3>
-                      <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Users weight="bold" className="size-3" />
-                          {summary.totalAnswers} answers
-                        </span>
-                        <span className="text-muted-foreground/30">/</span>
-                        <span>
-                          {winner.option} leading at {winnerPercent}%
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={summary.options}
-                          margin={{
-                            top: 8,
-                            right: 8,
-                            left: -20,
-                            bottom: 0,
-                          }}
-                        >
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke="var(--color-border)"
-                            strokeOpacity={0.3}
-                            horizontal={true}
-                            vertical={false}
-                          />
-                          <XAxis
-                            dataKey="option"
-                            tick={{
-                              fill: "currentColor",
-                              opacity: 0.5,
-                              fontSize: 12,
-                            }}
-                            axisLine={false}
-                            tickLine={false}
-                            dy={10}
-                          />
-                          <YAxis
-                            tick={{
-                              fill: "currentColor",
-                              opacity: 0.5,
-                              fontSize: 12,
-                            }}
-                            axisLine={false}
-                            tickLine={false}
-                            dx={-10}
-                            allowDecimals={false}
-                          />
-                          <Tooltip
-                            cursor={{
-                              fill: "var(--color-chart-1)",
-                              opacity: 0.05,
-                            }}
-                            contentStyle={{
-                              borderRadius: "8px",
-                              border: "1px solid var(--color-border)",
-                              backgroundColor: "var(--color-card)",
-                              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                              fontSize: "13px",
-                            }}
-                          />
-                          <Bar
-                            dataKey="count"
-                            radius={[4, 4, 0, 0]}
-                            maxBarSize={48}
-                          >
-                            {summary.options.map((_, i) => (
-                              <Cell
-                                key={i}
-                                fill={CHART_COLORS[i % CHART_COLORS.length]}
-                              />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
+              return (
+                <div
+                  key={summary.questionId}
+                  className={`rounded-2xl border border-border/40 bg-card p-8 ${
+                    isLastOdd ? 'lg:col-span-2' : ''
+                  }`}
+                >
+                  <div className="mb-6">
+                    <h3 className="font-heading text-base font-semibold leading-snug text-foreground">
+                      {summary.questionText}
+                    </h3>
+                    <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Users weight="bold" className="size-3" />
+                        {summary.totalAnswers} answers
+                      </span>
+                      <span className="text-muted-foreground/30">/</span>
+                      <span>
+                        {winner.option} leading at {winnerPercent}%
+                      </span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
+
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={summary.options}
+                        margin={{
+                          top: 8,
+                          right: 8,
+                          left: -20,
+                          bottom: 0,
+                        }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="var(--color-border)"
+                          strokeOpacity={0.3}
+                          horizontal={true}
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="option"
+                          tick={{
+                            fill: 'currentColor',
+                            opacity: 0.5,
+                            fontSize: 12,
+                          }}
+                          axisLine={false}
+                          tickLine={false}
+                          dy={10}
+                        />
+                        <YAxis
+                          tick={{
+                            fill: 'currentColor',
+                            opacity: 0.5,
+                            fontSize: 12,
+                          }}
+                          axisLine={false}
+                          tickLine={false}
+                          dx={-10}
+                          allowDecimals={false}
+                        />
+                        <Tooltip
+                          cursor={{
+                            fill: 'var(--color-chart-1)',
+                            opacity: 0.05,
+                          }}
+                          contentStyle={{
+                            borderRadius: '8px',
+                            border: '1px solid var(--color-border)',
+                            backgroundColor: 'var(--color-card)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                            fontSize: '13px',
+                          }}
+                        />
+                        <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={48}>
+                          {summary.options.map((_, i) => (
+                            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

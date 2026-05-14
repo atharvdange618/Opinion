@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IResponse extends Document {
   poll: mongoose.Types.ObjectId;
@@ -12,11 +12,11 @@ export interface IResponse extends Document {
 
 const responseSchema = new Schema<IResponse>(
   {
-    poll: { type: Schema.Types.ObjectId, ref: "Poll", required: true },
-    question: { type: Schema.Types.ObjectId, ref: "Question", required: true },
+    poll: { type: Schema.Types.ObjectId, ref: 'Poll', required: true },
+    question: { type: Schema.Types.ObjectId, ref: 'Question', required: true },
     respondent: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       default: null,
     },
     selectedOption: { type: String, required: true },
@@ -29,4 +29,4 @@ const responseSchema = new Schema<IResponse>(
 responseSchema.index({ poll: 1, respondentId: 1 });
 responseSchema.index({ poll: 1, question: 1 });
 
-export const Response = mongoose.model<IResponse>("Response", responseSchema);
+export const Response = mongoose.model<IResponse>('Response', responseSchema);

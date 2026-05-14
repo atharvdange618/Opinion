@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useInView } from "@/hooks/useInView";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { useInView } from '@/hooks/useInView';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export function CTA({ hasSession }: { hasSession: boolean }) {
   const { ref, inView } = useInView({ threshold: 0.3 });
@@ -16,10 +16,8 @@ export function CTA({ hasSession }: { hasSession: boolean }) {
       <div className="mx-auto max-w-6xl">
         <div
           className={cn(
-            "relative flex flex-col items-start gap-8 overflow-hidden rounded-2xl bg-primary/[0.03] px-8 py-12 ring-1 ring-foreground/5 sm:flex-row sm:items-center sm:px-12 sm:py-16 lg:px-16 transition-all duration-1000 ease-out",
-            inView
-              ? "translate-y-0 scale-100 opacity-100"
-              : "translate-y-8 scale-[0.97] opacity-0",
+            'relative flex flex-col items-start gap-8 overflow-hidden rounded-2xl bg-primary/[0.03] px-8 py-12 ring-1 ring-foreground/5 sm:flex-row sm:items-center sm:px-12 sm:py-16 lg:px-16 transition-all duration-1000 ease-out',
+            inView ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-8 scale-[0.97] opacity-0',
           )}
         >
           <div className="flex-1">
@@ -38,8 +36,8 @@ export function CTA({ hasSession }: { hasSession: boolean }) {
               <Link
                 href={
                   hasSession
-                    ? "/polls/create"
-                    : `${API_URL}/api/auth/login?redirect=${encodeURIComponent("/polls/create")}`
+                    ? '/polls/create'
+                    : `${API_URL}/api/auth/login?redirect=${encodeURIComponent('/polls/create')}`
                 }
               >
                 Create your first poll

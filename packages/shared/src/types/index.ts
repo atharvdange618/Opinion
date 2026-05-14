@@ -13,8 +13,8 @@ export interface PollDoc {
   title: string;
   description: string;
   expiresAt: string;
-  responseMode: "anonymous" | "authenticated";
-  status: "active" | "expired" | "published";
+  responseMode: 'anonymous' | 'authenticated';
+  status: 'active' | 'expired' | 'published';
   slug: string;
   createdAt: string;
 }

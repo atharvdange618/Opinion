@@ -1,13 +1,13 @@
-import { SignJWT, jwtVerify } from "jose";
-import { createPkceSession, consumePkceSession } from "../lib/oidc.js";
-import { BadRequestError } from "../lib/errors.js";
+import { SignJWT, jwtVerify } from 'jose';
+import { createPkceSession, consumePkceSession } from '../lib/oidc.js';
+import { BadRequestError } from '../lib/errors.js';
 
 const IDP_URL = process.env.KLEIS_IDP_URL!;
 const CLIENT_ID = process.env.KLEIS_CLIENT_ID!;
 const CLIENT_SECRET = process.env.KLEIS_CLIENT_SECRET!;
 const APP_URL = process.env.PUBLIC_APP_URL!;
 const FRONTEND_URL = process.env.PUBLIC_FRONTEND_URL!;
-const SESSION_SECRET = new TextEncoder().encode(process.env.SESSION_SECRET!);
+const SESSION_SECRET = new TextEncoder().encode(process.env.SESSION_SECRET);
 const SESSION_DURATION = 7 * 24 * 60 * 60;
 
 export interface SessionUser {
@@ -24,11 +24,11 @@ export async function initiateLogin(
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: `${APP_URL}/api/auth/callback`,
-    response_type: "code",
-    scope: "openid profile email",
+    response_type: 'code',
+    scope: 'openid profile email',
     state,
     code_challenge: codeChallenge,
-    code_challenge_method: "S256",
+    code_challenge_method: 'S256',
   });
 
   return { authorizeUrl: `${IDP_URL}/authorize?${params.toString()}`, state };
@@ -39,13 +39,13 @@ export async function completeAuth(
   state: string,
 ): Promise<{ user: SessionUser; sessionJwt: string; redirectTo: string }> {
   const pkce = await consumePkceSession(state);
-  if (!pkce) throw new BadRequestError("Invalid or expired state parameter");
+  if (!pkce) throw new BadRequestError('Invalid or expired state parameter');
 
   const tokenRes = await fetch(`${IDP_URL}/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      grant_type: "authorization_code",
+      grant_type: 'authorization_code',
       code,
       redirect_uri: `${APP_URL}/api/auth/callback`,
       client_id: CLIENT_ID,
@@ -66,7 +66,7 @@ export async function completeAuth(
   });
 
   if (!userinfoRes.ok) {
-    throw new BadRequestError("Failed to fetch user info");
+    throw new BadRequestError('Failed to fetch user info');
   }
 
   const userinfo = await userinfoRes.json();
@@ -74,15 +74,14 @@ export async function completeAuth(
   const user: SessionUser = {
     sub: userinfo.sub,
     email: userinfo.email,
-    name:
-      userinfo.given_name
-        ? `${userinfo.given_name} ${userinfo.family_name || ""}`.trim()
-        : userinfo.name || userinfo.email,
+    name: userinfo.given_name
+      ? `${userinfo.given_name} ${userinfo.family_name || ''}`.trim()
+      : userinfo.name || userinfo.email,
     picture: userinfo.picture,
   };
 
   const sessionJwt = await new SignJWT({ ...user })
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_DURATION}s`)
     .sign(SESSION_SECRET);
@@ -90,12 +89,10 @@ export async function completeAuth(
   return { user, sessionJwt, redirectTo: pkce.redirectTo };
 }
 
-export async function verifySessionJwt(
-  jwt: string,
-): Promise<SessionUser | null> {
+export async function verifySessionJwt(jwt: string): Promise<SessionUser | null> {
   try {
     const { payload } = await jwtVerify(jwt, SESSION_SECRET, {
-      algorithms: ["HS256"],
+      algorithms: ['HS256'],
     });
     return {
       sub: payload.sub as string,

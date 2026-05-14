@@ -1,11 +1,11 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const submitResponseSchema = z.object({
   answers: z
     .array(
       z.object({
         questionId: z.string(),
-        selectedOption: z.string().min(1, "Option is required"),
+        selectedOption: z.string().min(1, 'Option is required'),
       }),
     )
     .min(1),

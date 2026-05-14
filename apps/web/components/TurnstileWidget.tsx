@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect } from 'react';
 
-const TURNSTILE_SCRIPT_ID = "cf-turnstile-script";
-const TURNSTILE_SRC =
-  "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script';
+const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 interface TurnstileWidgetProps {
   onVerify: (token: string) => void;
@@ -19,8 +18,8 @@ declare global {
         options: {
           sitekey: string;
           callback: (token: string) => void;
-          "expired-callback"?: () => void;
-          theme?: "light" | "dark" | "auto";
+          'expired-callback'?: () => void;
+          theme?: 'light' | 'dark' | 'auto';
         },
       ) => string;
       reset: (widgetId: string) => void;
@@ -46,7 +45,7 @@ function loadTurnstileScript(): Promise<void> {
       return;
     }
 
-    const script = document.createElement("script");
+    const script = document.createElement('script');
     script.id = TURNSTILE_SCRIPT_ID;
     script.src = TURNSTILE_SRC;
     script.async = true;
@@ -78,7 +77,7 @@ export function TurnstileWidget({ onVerify, onExpire }: TurnstileWidgetProps) {
   onExpireRef.current = onExpire;
 
   useEffect(() => {
-    loadTurnstileScript().then(() => {
+    void loadTurnstileScript().then(() => {
       const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
       if (!siteKey || !containerRef.current || !window.turnstile) return;
       if (widgetIdRef.current) return;
@@ -86,7 +85,7 @@ export function TurnstileWidget({ onVerify, onExpire }: TurnstileWidgetProps) {
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: siteKey,
         callback: (token: string) => onVerifyRef.current(token),
-        "expired-callback": () => onExpireRef.current?.(),
+        'expired-callback': () => onExpireRef.current?.(),
       });
     });
 

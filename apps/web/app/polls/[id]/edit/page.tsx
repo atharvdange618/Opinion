@@ -1,47 +1,43 @@
-"use client";
+'use client';
 
-import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createPollSchema } from "@opinion/shared";
-import { z } from "zod";
+import { use, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createPollSchema } from '@opinion/shared';
+import { z } from 'zod';
 type FormInput = z.input<typeof createPollSchema>;
-import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { api } from '@/lib/api';
+import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
-import { DateTimePicker } from "@/components/datetime-picker";
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { DateTimePicker } from '@/components/datetime-picker';
 
-export default function EditPollPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function EditPollPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { push } = useRouter();
+  const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = "Edit Poll - Opinion";
+    document.title = 'Edit Poll - Opinion';
   }, []);
 
   const { data: poll, isLoading } = useQuery({
-    queryKey: ["poll", id],
+    queryKey: ['poll', id],
     queryFn: async () => {
       const { data } = await api.get(`/polls/${id}`);
       return data;
@@ -54,6 +50,7 @@ export default function EditPollPage({
         description: poll.description,
         expiresAt: new Date(poll.expiresAt).toISOString().slice(0, 16),
         responseMode: poll.responseMode,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         questions: poll.questions.map((q: any) => ({
           text: q.text,
           options: q.options,
@@ -80,19 +77,18 @@ export default function EditPollPage({
     append: addQuestion,
     remove: removeQuestion,
     move: moveQuestion,
-  } = useFieldArray({ control, name: "questions" });
+  } = useFieldArray({ control, name: 'questions' });
 
   async function onSubmit(data: FormInput) {
     setSubmitting(true);
     setSubmitError(null);
     try {
       await api.put(`/polls/${id}`, data);
-      push(`/polls/${id}/analytics`);
-    } catch (err: any) {
+      router.push(`/polls/${id}/analytics`);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
       const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Failed to update poll. Please try again.";
+        error?.response?.data?.message || error?.message || 'Failed to update poll. Please try again.';
       setSubmitError(message);
     } finally {
       setSubmitting(false);
@@ -114,15 +110,13 @@ export default function EditPollPage({
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <div className="mb-10">
-        <h1 className="font-heading text-4xl font-semibold tracking-tight">
-          Edit Poll
-        </h1>
+        <h1 className="font-heading text-4xl font-semibold tracking-tight">Edit Poll</h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Update your poll's details and questions.
+          Update your poll&apos;s details and questions.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={(e) => { handleSubmit(onSubmit)(e).catch(console.error); }} className="space-y-8">
         <Card className="bg-card border-border/50 shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="font-heading text-xl">Details</CardTitle>
@@ -135,26 +129,21 @@ export default function EditPollPage({
               <Input
                 id="edit-title"
                 className="bg-background/50 h-12 text-lg transition-colors focus-visible:bg-background"
-                {...register("title")}
+                {...register('title')}
               />
               {errors.title && (
-                <p className="text-sm font-medium text-destructive">
-                  {errors.title.message}
-                </p>
+                <p className="text-sm font-medium text-destructive">{errors.title.message}</p>
               )}
             </div>
 
             <div className="space-y-3">
               <Label htmlFor="edit-description" className="text-sm font-medium">
-                Description{" "}
-                <span className="text-muted-foreground font-normal">
-                  (Optional)
-                </span>
+                Description <span className="text-muted-foreground font-normal">(Optional)</span>
               </Label>
               <Textarea
                 id="edit-description"
                 className="bg-background/50 resize-none transition-colors focus-visible:bg-background"
-                {...register("description")}
+                {...register('description')}
                 rows={3}
               />
             </div>
@@ -166,36 +155,28 @@ export default function EditPollPage({
                 </Label>
                 <DateTimePicker
                   date={
-                    watch("expiresAt") &&
-                    !isNaN(Date.parse(watch("expiresAt") as string))
-                      ? new Date(watch("expiresAt") as string)
+                    watch('expiresAt') && !isNaN(Date.parse(watch('expiresAt')))
+                      ? new Date(watch('expiresAt'))
                       : undefined
                   }
                   onDateChange={(date) =>
-                    setValue(
-                      "expiresAt" as any,
-                      date ? date.toISOString() : "",
-                      { shouldValidate: true },
-                    )
+                    setValue('expiresAt', date ? date.toISOString() : '', {
+                      shouldValidate: true,
+                    })
                   }
                 />
                 {errors.expiresAt && (
-                  <p className="text-sm font-medium text-destructive">
-                    {errors.expiresAt.message}
-                  </p>
+                  <p className="text-sm font-medium text-destructive">{errors.expiresAt.message}</p>
                 )}
               </div>
 
               <div className="space-y-3">
-                <Label
-                  htmlFor="edit-responseMode"
-                  className="text-sm font-medium"
-                >
+                <Label htmlFor="edit-responseMode" className="text-sm font-medium">
                   Response mode
                 </Label>
                 <Select
                   defaultValue={poll?.responseMode}
-                  onValueChange={(val) => setValue("responseMode" as any, val)}
+                  onValueChange={(val) => setValue('responseMode', val)}
                 >
                   <SelectTrigger
                     id="edit-responseMode"
@@ -224,8 +205,8 @@ export default function EditPollPage({
                 className="rounded-full shadow-sm"
                 onClick={() =>
                   addQuestion({
-                    text: "",
-                    options: ["", ""],
+                    text: '',
+                    options: ['', ''],
                     isMandatory: false,
                     order: questionFields.length,
                   })
@@ -287,10 +268,7 @@ export default function EditPollPage({
 
                 <div className="space-y-3 pl-2">
                   {field.options.map((_, oIndex) => (
-                    <div
-                      key={oIndex}
-                      className="group/option flex items-center gap-3"
-                    >
+                    <div key={oIndex} className="group/option flex items-center gap-3">
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background text-xs font-medium text-muted-foreground">
                         {String.fromCharCode(65 + oIndex)}
                       </div>
@@ -307,10 +285,8 @@ export default function EditPollPage({
                           onClick={() => {
                             const newOptions = [...field.options];
                             newOptions.splice(oIndex, 1);
-                            setValue(
-                              `questions.${qIndex}.options` as any,
-                              newOptions,
-                            );
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            setValue(`questions.${qIndex}.options` as any, newOptions);
                           }}
                           className="h-8 w-8 shrink-0 rounded-full text-destructive opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover/option:opacity-100 focus-visible:opacity-100"
                         >
@@ -329,10 +305,8 @@ export default function EditPollPage({
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      setValue(`questions.${qIndex}.options` as any, [
-                        ...field.options,
-                        "",
-                      ]);
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      setValue(`questions.${qIndex}.options` as any, [...field.options, '']);
                     }}
                     className="rounded-full text-muted-foreground hover:text-foreground"
                   >
@@ -345,10 +319,8 @@ export default function EditPollPage({
                       id={`mandatory-${qIndex}`}
                       checked={watch(`questions.${qIndex}.isMandatory`)}
                       onCheckedChange={(checked) =>
-                        setValue(
-                          `questions.${qIndex}.isMandatory` as any,
-                          checked === true,
-                        )
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        setValue(`questions.${qIndex}.isMandatory` as any, checked === true)
                       }
                     />
                     <Label
@@ -366,9 +338,7 @@ export default function EditPollPage({
 
         {submitError && (
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-5 py-4">
-            <p className="text-sm font-medium text-destructive">
-              {submitError}
-            </p>
+            <p className="text-sm font-medium text-destructive">{submitError}</p>
           </div>
         )}
 
@@ -379,7 +349,7 @@ export default function EditPollPage({
             disabled={submitting}
             className="min-w-48 rounded-full shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5"
           >
-            {submitting ? "Saving Changes..." : "Save Changes"}
+            {submitting ? 'Saving Changes...' : 'Save Changes'}
           </Button>
         </div>
       </form>

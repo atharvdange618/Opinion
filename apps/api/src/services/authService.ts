@@ -1,6 +1,6 @@
-import { User, IUser } from "../models/User.js";
-import { NotFoundError } from "../lib/errors.js";
-import type { AuthPayload } from "../middleware/auth.js";
+import { User, IUser } from '../models/User.js';
+import { NotFoundError } from '../lib/errors.js';
+import type { AuthPayload } from '../middleware/auth.js';
 
 export async function syncUser(userInfo: AuthPayload): Promise<IUser> {
   const user = await User.findOneAndUpdate(
@@ -13,6 +13,6 @@ export async function syncUser(userInfo: AuthPayload): Promise<IUser> {
 
 export async function getMe(userInfo: AuthPayload): Promise<IUser> {
   const user = await User.findOne({ sub: userInfo.sub });
-  if (!user) throw new NotFoundError("User not found");
+  if (!user) throw new NotFoundError('User not found');
   return user;
 }

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { createContext, use, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { createContext, use, useEffect, useState } from 'react';
+import { api } from '@/lib/api';
 
 interface User {
   sub: string;
@@ -39,7 +39,7 @@ export function AuthProvider({
     if (!hasSession) return;
 
     api
-      .get<User>("/auth/me")
+      .get<User>('/auth/me')
       .then(({ data }) => {
         setState({ isLoaded: true, isSignedIn: true, user: data });
       })

@@ -1,27 +1,27 @@
-"use client";
+'use client';
 
-import { useInView } from "@/hooks/useInView";
-import { cn } from "@/lib/utils";
-import { PenLine, Share2, BarChart3 } from "lucide-react";
+import { useInView } from '@/hooks/useInView';
+import { cn } from '@/lib/utils';
+import { PenLine, Share2, BarChart3 } from 'lucide-react';
 
 const steps = [
   {
     icon: PenLine,
-    title: "Create your poll",
+    title: 'Create your poll',
     description:
-      "Add questions, set anonymous or authenticated mode, pick an expiry. Takes under a minute.",
+      'Add questions, set anonymous or authenticated mode, pick an expiry. Takes under a minute.',
   },
   {
     icon: Share2,
-    title: "Share the link",
+    title: 'Share the link',
     description:
-      "One URL works everywhere - email, social, Slack, or embedded right on your page. No sign-up needed to respond.",
+      'One URL works everywhere - email, social, Slack, or embedded right on your page. No sign-up needed to respond.',
   },
   {
     icon: BarChart3,
-    title: "Watch responses live",
+    title: 'Watch responses live',
     description:
-      "Results appears as they come in. Per-question breakdowns, response timelines, and participation insights update in real time.",
+      'Results appears as they come in. Per-question breakdowns, response timelines, and participation insights update in real time.',
   },
 ];
 
@@ -33,8 +33,8 @@ export function HowItWorks() {
       <div className="mx-auto max-w-6xl">
         <div
           className={cn(
-            "mb-16 max-w-xl transition-all duration-1000 ease-out",
-            inView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+            'mb-16 max-w-xl transition-all duration-1000 ease-out',
+            inView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
           )}
         >
           <p className="mb-3 text-xs font-medium uppercase tracking-widest text-primary">
@@ -44,8 +44,7 @@ export function HowItWorks() {
             Three steps to insight
           </h2>
           <p className="mt-3 text-lg text-muted-foreground">
-            From question to answers in no time. No account required for
-            respondents.
+            From question to answers in no time. No account required for respondents.
           </p>
         </div>
 
@@ -55,10 +54,8 @@ export function HowItWorks() {
               key={step.title}
               style={{ transitionDelay: `${i * 200}ms` }}
               className={cn(
-                "relative transition-all duration-700 ease-out",
-                inView
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-8 opacity-0",
+                'relative transition-all duration-700 ease-out',
+                inView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
               )}
             >
               {i < steps.length - 1 && (
@@ -75,9 +72,7 @@ export function HowItWorks() {
               <h3 className="mb-3 font-heading text-lg font-semibold text-foreground">
                 {step.title}
               </h3>
-              <p className="text-base leading-relaxed text-muted-foreground">
-                {step.description}
-              </p>
+              <p className="text-base leading-relaxed text-muted-foreground">{step.description}</p>
             </div>
           ))}
         </div>

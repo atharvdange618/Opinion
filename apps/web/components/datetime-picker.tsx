@@ -1,17 +1,13 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { format } from "date-fns";
-import { CalendarBlank, Clock } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
+import * as React from 'react';
+import { format } from 'date-fns';
+import { CalendarBlank, Clock } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Input } from '@/components/ui/input';
 
 interface DateTimePickerProps {
   date?: Date;
@@ -23,27 +19,25 @@ interface DateTimePickerProps {
 export function DateTimePicker({
   date,
   onDateChange,
-  placeholder = "Pick a date and time",
+  placeholder = 'Pick a date and time',
   disabled = false,
 }: DateTimePickerProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
-    date,
-  );
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(date);
   const [timeValue, setTimeValue] = React.useState<string>(() => {
     if (date) {
-      const hours = date.getHours().toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
       return `${hours}:${minutes}`;
     }
-    return "14:00";
+    return '14:00';
   });
 
   React.useEffect(() => {
     if (date) {
       setSelectedDate(date);
-      const hours = date.getHours().toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
       setTimeValue(`${hours}:${minutes}`);
     }
   }, [date]);
@@ -55,13 +49,22 @@ export function DateTimePicker({
       return;
     }
 
-    const [hours, minutes] = timeValue.split(":").map((v) => parseInt(v, 10));
+    const [hours, minutes] = timeValue.split(':').map((v) => parseInt(v, 10));
 
     const dateWithTime = new Date(newDate);
     dateWithTime.setHours(hours || 0);
     dateWithTime.setMinutes(minutes || 0);
     dateWithTime.setSeconds(0);
     dateWithTime.setMilliseconds(0);
+
+    const now = new Date();
+    if (dateWithTime <= now) {
+      dateWithTime.setHours(now.getHours());
+      dateWithTime.setMinutes(now.getMinutes() + 1);
+      const hh = dateWithTime.getHours().toString().padStart(2, '0');
+      const mm = dateWithTime.getMinutes().toString().padStart(2, '0');
+      setTimeValue(`${hh}:${mm}`);
+    }
 
     setSelectedDate(dateWithTime);
     onDateChange(dateWithTime);
@@ -72,7 +75,7 @@ export function DateTimePicker({
 
     if (!selectedDate) return;
 
-    const [hours, minutes] = newTime.split(":").map((v) => parseInt(v, 10));
+    const [hours, minutes] = newTime.split(':').map((v) => parseInt(v, 10));
 
     if (isNaN(hours) || isNaN(minutes)) return;
 
@@ -80,9 +83,30 @@ export function DateTimePicker({
     newDate.setHours(hours);
     newDate.setMinutes(minutes);
 
+    const now = new Date();
+    const isToday =
+      newDate.getFullYear() === now.getFullYear() &&
+      newDate.getMonth() === now.getMonth() &&
+      newDate.getDate() === now.getDate();
+
+    if (isToday && newDate <= now) {
+      return;
+    }
+
     setSelectedDate(newDate);
     onDateChange(newDate);
   };
+
+  const minTime = React.useMemo(() => {
+    if (!selectedDate) return undefined;
+    const now = new Date();
+    const isToday =
+      selectedDate.getFullYear() === now.getFullYear() &&
+      selectedDate.getMonth() === now.getMonth() &&
+      selectedDate.getDate() === now.getDate();
+    if (!isToday) return undefined;
+    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  }, [selectedDate]);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -91,16 +115,12 @@ export function DateTimePicker({
           variant="outline"
           disabled={disabled}
           className={cn(
-            "w-full justify-start text-left font-normal",
-            !selectedDate && "text-muted-foreground",
+            'w-full justify-start text-left font-normal',
+            !selectedDate && 'text-muted-foreground',
           )}
         >
           <CalendarBlank size={16} className="mr-2" />
-          {selectedDate ? (
-            format(selectedDate, "PPP 'at' h:mm a")
-          ) : (
-            <span>{placeholder}</span>
-          )}
+          {selectedDate ? format(selectedDate, "PPP 'at' h:mm a") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -109,9 +129,7 @@ export function DateTimePicker({
             mode="single"
             selected={selectedDate}
             onSelect={handleDateSelect}
-            disabled={(date) =>
-              date < new Date(new Date().setHours(0, 0, 0, 0))
-            }
+            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
           />
           <div className="border-t border-border p-3">
             <div className="flex items-center gap-2">
@@ -119,20 +137,15 @@ export function DateTimePicker({
               <Input
                 type="time"
                 value={timeValue}
+                min={minTime}
                 onChange={(e) => handleTimeChange(e.target.value)}
                 className="h-8"
               />
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Time: {timeValue}
-            </p>
+            <p className="text-xs text-muted-foreground mt-2">Time: {timeValue}</p>
           </div>
           <div className="border-t border-border p-2 flex justify-end gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
             <Button size="sm" onClick={() => setIsOpen(false)}>

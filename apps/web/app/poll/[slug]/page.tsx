@@ -1,44 +1,27 @@
-"use client";
+'use client';
 
-import { use, useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@/hooks/useAuth";
-import { api } from "@/lib/api";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "@/components/Charts";
-import {
-  submitResponseSchema,
-  type SubmitResponseInput,
-} from "@opinion/shared";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  LogIn,
-  Users,
-  ShieldAlert,
-  ShieldCheck,
-  Clock,
-  Calendar,
-} from "lucide-react";
-import { TurnstileWidget } from "@/components/TurnstileWidget";
-import { SuccessArt } from "@/components/illustrations/SuccessArt";
-import { ResultsArt } from "@/components/illustrations/ResultsArt";
+import { use, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from '@/components/Charts';
+import { submitResponseSchema, type SubmitResponseInput } from '@opinion/shared';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { LogIn, Users, ShieldAlert, ShieldCheck, Clock, Calendar } from 'lucide-react';
+import { SuccessArt } from '@/components/illustrations/SuccessArt';
+import { ResultsArt } from '@/components/illustrations/ResultsArt';
 
 interface PublicPoll {
   _id: string;
   title: string;
   description: string;
-  responseMode: "anonymous" | "authenticated";
+  responseMode: 'anonymous' | 'authenticated';
   status: string;
   slug: string;
   expiresAt: string;
@@ -68,10 +51,10 @@ function QuestionCard({
   register,
   errors,
 }: {
-  question: PublicPoll["questions"][0];
+  question: PublicPoll['questions'][0];
   index: number;
-  register: any;
-  errors: any;
+  register: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  errors: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }) {
   const [selected, setSelected] = useState<string | undefined>(undefined);
 
@@ -86,9 +69,7 @@ function QuestionCard({
           </span>
           <CardTitle className="font-heading text-base leading-snug">
             {question.text}
-            {question.isMandatory && (
-              <span className="ml-1 text-destructive">*</span>
-            )}
+            {question.isMandatory && <span className="ml-1 text-destructive">*</span>}
           </CardTitle>
         </div>
       </CardHeader>
@@ -105,7 +86,7 @@ function QuestionCard({
             (
               register(`answers.${index}.selectedOption`, {
                 required: question.isMandatory,
-              }).onChange as any
+              }).onChange
             )(event);
           }}
         >
@@ -115,21 +96,19 @@ function QuestionCard({
                 key={oIndex}
                 className={`group/option flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-all ${
                   isSelected(option)
-                    ? "border-primary/30 bg-primary/5 ring-1 ring-primary/20"
-                    : "border-border/60 hover:border-border"
+                    ? 'border-primary/30 bg-primary/5 ring-1 ring-primary/20'
+                    : 'border-border/60 hover:border-border'
                 }`}
               >
                 <RadioGroupItem value={option} className="sr-only" />
                 <span
                   className={`size-4 shrink-0 rounded-full border-2 transition-all ${
-                    isSelected(option)
-                      ? "border-primary bg-primary"
-                      : "border-muted-foreground/30"
+                    isSelected(option) ? 'border-primary bg-primary' : 'border-muted-foreground/30'
                   }`}
                 />
                 <span
                   className={`text-sm transition-all ${
-                    isSelected(option) ? "font-medium" : "text-foreground"
+                    isSelected(option) ? 'font-medium' : 'text-foreground'
                   }`}
                 >
                   {option}
@@ -139,9 +118,7 @@ function QuestionCard({
           </div>
         </RadioGroup>
         {errors.answers?.[index]?.selectedOption && (
-          <p className="mt-3 text-sm text-destructive">
-            Please select an option
-          </p>
+          <p className="mt-3 text-sm text-destructive">Please select an option</p>
         )}
         <input
           type="hidden"
@@ -164,10 +141,6 @@ function VotingForm({
   isSubmitting: boolean;
   error: string | null;
 }) {
-  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(
-    undefined,
-  );
-
   const {
     register,
     handleSubmit,
@@ -177,10 +150,7 @@ function VotingForm({
   });
 
   return (
-    <form
-      onSubmit={handleSubmit((data) => onSubmit({ ...data, turnstileToken }))}
-      className="space-y-6"
-    >
+    <form onSubmit={(e) => { handleSubmit((data) => onSubmit(data))(e).catch(console.error); }} className="space-y-6">
       {poll.questions.map((question, index) => (
         <QuestionCard
           key={question._id}
@@ -191,16 +161,10 @@ function VotingForm({
         />
       ))}
 
-      {poll.responseMode === "anonymous" && (
-        <div className="space-y-3">
-          <TurnstileWidget
-            onVerify={setTurnstileToken}
-            onExpire={() => setTurnstileToken(undefined)}
-          />
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <ShieldAlert className="size-3.5" />
-            <span>Anonymous response - your identity is not recorded</span>
-          </div>
+      {poll.responseMode === 'anonymous' && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <ShieldAlert className="size-3.5" />
+          <span>Anonymous response &middot; your identity is not recorded</span>
         </div>
       )}
 
@@ -210,15 +174,8 @@ function VotingForm({
         </p>
       )}
 
-      <Button
-        type="submit"
-        disabled={
-          isSubmitting || (poll.responseMode === "anonymous" && !turnstileToken)
-        }
-        className="w-full"
-        size="lg"
-      >
-        {isSubmitting ? "Submitting..." : "Submit responses"}
+      <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
+        {isSubmitting ? 'Submitting...' : 'Submit responses'}
       </Button>
     </form>
   );
@@ -228,9 +185,7 @@ function ThankYouScreen() {
   return (
     <div className="flex flex-col items-center py-16 text-center">
       <SuccessArt />
-      <h2 className="mt-8 font-heading text-2xl font-semibold">
-        Response recorded
-      </h2>
+      <h2 className="mt-8 font-heading text-2xl font-semibold">Response recorded</h2>
       <p className="mt-2 max-w-sm text-muted-foreground">
         Thank you for participating. Your feedback helps shape better decisions.
       </p>
@@ -246,12 +201,11 @@ function AuthRequiredScreen({ slug }: { slug: string }) {
       </div>
       <h2 className="font-heading text-2xl font-semibold">Sign in required</h2>
       <p className="mt-2 max-w-sm text-muted-foreground">
-        This poll is restricted to authenticated users only. Sign in to
-        participate.
+        This poll is restricted to authenticated users only. Sign in to participate.
       </p>
       <Button className="mt-6" asChild>
         <a
-          href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/login?redirect=${encodeURIComponent(`/poll/${slug}`)}`}
+          href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/auth/login?redirect=${encodeURIComponent(`/poll/${slug}`)}`}
         >
           <LogIn className="mr-2 size-4" />
           Sign in to respond
@@ -288,13 +242,9 @@ function PublishedResultsScreen({
     <div className="space-y-10">
       <div className="flex flex-col items-center text-center">
         <ResultsArt />
-        <h1 className="mt-6 font-heading text-3xl font-semibold tracking-tight">
-          {poll.title}
-        </h1>
+        <h1 className="mt-6 font-heading text-3xl font-semibold tracking-tight">{poll.title}</h1>
         {poll.description && (
-          <p className="mt-2 max-w-md text-muted-foreground">
-            {poll.description}
-          </p>
+          <p className="mt-2 max-w-md text-muted-foreground">{poll.description}</p>
         )}
         <div className="mt-4 flex items-center gap-4 font-mono text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
@@ -306,13 +256,9 @@ function PublishedResultsScreen({
 
       <div className="space-y-8">
         {results.questionSummaries.map((summary) => {
-          const winner = summary.options.reduce((a, b) =>
-            a.count > b.count ? a : b,
-          );
+          const winner = summary.options.reduce((a, b) => (a.count > b.count ? a : b));
           const winnerPercent =
-            summary.totalAnswers > 0
-              ? Math.round((winner.count / summary.totalAnswers) * 100)
-              : 0;
+            summary.totalAnswers > 0 ? Math.round((winner.count / summary.totalAnswers) * 100) : 0;
 
           return (
             <Card key={summary.questionId} className="border-border/60 bg-card">
@@ -342,7 +288,7 @@ function PublishedResultsScreen({
                       <XAxis
                         dataKey="option"
                         tick={{
-                          fill: "currentColor",
+                          fill: 'currentColor',
                           opacity: 0.5,
                           fontSize: 12,
                         }}
@@ -352,7 +298,7 @@ function PublishedResultsScreen({
                       />
                       <YAxis
                         tick={{
-                          fill: "currentColor",
+                          fill: 'currentColor',
                           opacity: 0.5,
                           fontSize: 12,
                         }}
@@ -361,11 +307,11 @@ function PublishedResultsScreen({
                         dx={-10}
                       />
                       <Tooltip
-                        cursor={{ fill: "var(--color-primary)", opacity: 0.05 }}
+                        cursor={{ fill: 'var(--color-primary)', opacity: 0.05 }}
                         contentStyle={{
-                          borderRadius: "12px",
-                          border: "1px solid var(--color-border)",
-                          backgroundColor: "var(--color-card)",
+                          borderRadius: '12px',
+                          border: '1px solid var(--color-border)',
+                          backgroundColor: 'var(--color-card)',
                         }}
                       />
                       <Bar
@@ -386,23 +332,24 @@ function PublishedResultsScreen({
   );
 }
 
-export default function PublicPollPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default function PublicPollPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
+  const router = useRouter();
   const { isSignedIn } = useAuth();
   const queryClient = useQueryClient();
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const verificationCheckDone = useRef<string | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<'unknown' | 'checking' | 'verified'>(
+    'unknown',
+  );
 
   useEffect(() => {
-    document.title = "Poll - Opinion";
+    document.title = 'Poll - Opinion';
   }, []);
 
   const { data: poll, isLoading: pollLoading } = useQuery({
-    queryKey: ["public-poll", slug],
+    queryKey: ['public-poll', slug],
     queryFn: async () => {
       const { data } = await api.get<PublicPoll>(`/polls/public/${slug}`);
       return data;
@@ -410,15 +357,44 @@ export default function PublicPollPage({
   });
 
   const { data: results } = useQuery({
-    queryKey: ["public-results", slug],
+    queryKey: ['public-results', slug],
     queryFn: async () => {
-      const { data } = await api.get<PublishedResults>(
-        `/polls/public/${slug}/results`,
-      );
+      const { data } = await api.get<PublishedResults>(`/polls/public/${slug}/results`);
       return data;
     },
-    enabled: poll?.status === "published",
+    enabled: poll?.status === 'published',
   });
+
+  useEffect(() => {
+    if (!poll) return;
+
+    const needsVerification = poll.responseMode === 'anonymous' && poll.status === 'active';
+
+    if (!needsVerification) {
+      verificationCheckDone.current = slug;
+      setVerificationStatus('verified');
+      return;
+    }
+
+    if (verificationCheckDone.current === slug) return;
+
+    verificationCheckDone.current = slug;
+    setVerificationStatus('checking');
+
+    api
+      .get<{ verified: boolean }>(`/polls/public/${slug}/verify/status`)
+      .then(({ data }) => {
+        if (data.verified) {
+          setVerificationStatus('verified');
+          return;
+        }
+
+        router.replace(`/poll/${slug}/verify`);
+      })
+      .catch(() => {
+        router.replace(`/poll/${slug}/verify`);
+      });
+  }, [poll, router, slug]);
 
   const submitMutation = useMutation({
     mutationFn: async (data: SubmitResponseInput) => {
@@ -426,13 +402,12 @@ export default function PublicPollPage({
     },
     onSuccess: () => {
       setSubmitted(true);
-      queryClient.invalidateQueries({ queryKey: ["public-poll", slug] });
+      void queryClient.invalidateQueries({ queryKey: ['public-poll', slug] });
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
       setSubmitError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to submit. Please try again.",
+        error?.response?.data?.message || error?.message || 'Failed to submit. Please try again.',
       );
     },
   });
@@ -468,7 +443,7 @@ export default function PublicPollPage({
     );
   }
 
-  if (poll.status === "expired") {
+  if (poll.status === 'expired') {
     return (
       <div className="mx-auto max-w-2xl px-4 py-12">
         <ExpiredScreen title={poll.title} />
@@ -476,7 +451,7 @@ export default function PublicPollPage({
     );
   }
 
-  if (poll.status === "published" && results) {
+  if (poll.status === 'published' && results) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <PublishedResultsScreen poll={poll} results={results} />
@@ -484,12 +459,10 @@ export default function PublicPollPage({
     );
   }
 
-  if (poll.status !== "active") {
+  if (poll.status !== 'active') {
     return (
       <div className="flex flex-col items-center py-16 text-center">
-        <h2 className="font-heading text-2xl font-semibold">
-          Poll not accepting responses
-        </h2>
+        <h2 className="font-heading text-2xl font-semibold">Poll not accepting responses</h2>
         <p className="mt-2 max-w-sm text-muted-foreground">
           This poll is currently not accepting responses.
         </p>
@@ -497,10 +470,25 @@ export default function PublicPollPage({
     );
   }
 
-  if (poll.responseMode === "authenticated" && !isSignedIn) {
+  if (poll.responseMode === 'authenticated' && !isSignedIn) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-12">
         <AuthRequiredScreen slug={slug} />
+      </div>
+    );
+  }
+
+  if (
+    poll.responseMode === 'anonymous' &&
+    poll.status === 'active' &&
+    verificationStatus !== 'verified'
+  ) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-12">
+        <Skeleton className="mb-4 h-10 w-64" />
+        <Skeleton className="mb-8 h-4 w-96" />
+        <Skeleton className="h-48 rounded-xl" />
+        <Skeleton className="mt-6 h-12 w-full rounded-xl" />
       </div>
     );
   }
@@ -515,10 +503,10 @@ export default function PublicPollPage({
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     });
   };
 
@@ -527,30 +515,26 @@ export default function PublicPollPage({
     const expiry = new Date(expiresAt);
     const diff = expiry.getTime() - now.getTime();
 
-    if (diff <= 0) return "Expired";
+    if (diff <= 0) return 'Expired';
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
     if (days > 0) return `${days}d ${hours}h left`;
     if (hours > 0) return `${hours}h left`;
-    return "Expiring soon";
+    return 'Expiring soon';
   };
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
       <div className="mb-8">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight">
-          {poll.title}
-        </h1>
-        {poll.description && (
-          <p className="mt-2 text-muted-foreground">{poll.description}</p>
-        )}
+        <h1 className="font-heading text-3xl font-semibold tracking-tight">{poll.title}</h1>
+        {poll.description && <p className="mt-2 text-muted-foreground">{poll.description}</p>}
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <Users className="size-3.5" />
             {poll.questions.length} question
-            {poll.questions.length !== 1 ? "s" : ""}
+            {poll.questions.length !== 1 ? 's' : ''}
           </span>
           <span className="text-muted-foreground/50">·</span>
           <span className="flex items-center gap-1.5">
@@ -560,9 +544,7 @@ export default function PublicPollPage({
           <span className="text-muted-foreground/50">·</span>
           <span
             className={`flex items-center gap-1.5 ${
-              new Date(poll.expiresAt) > new Date()
-                ? "text-success"
-                : "text-destructive"
+              new Date(poll.expiresAt) > new Date() ? 'text-success' : 'text-destructive'
             }`}
           >
             <Clock className="size-3.5" />
@@ -571,12 +553,10 @@ export default function PublicPollPage({
           <span className="text-muted-foreground/50">·</span>
           <span
             className={`flex items-center gap-1.5 ${
-              poll.responseMode === "anonymous"
-                ? "text-success"
-                : "text-muted-foreground"
+              poll.responseMode === 'anonymous' ? 'text-success' : 'text-muted-foreground'
             }`}
           >
-            {poll.responseMode === "anonymous" ? (
+            {poll.responseMode === 'anonymous' ? (
               <ShieldAlert className="size-3.5" />
             ) : (
               <ShieldCheck className="size-3.5" />

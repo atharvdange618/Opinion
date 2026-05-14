@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { BrandLogo } from "@/components/layout/BrandLogo";
+import Link from 'next/link';
+import { BrandLogo } from '@/components/layout/BrandLogo';
 
 export function GlobalFooter() {
   return (
@@ -12,21 +12,13 @@ export function GlobalFooter() {
           >
             <BrandLogo className="h-7" />
           </Link>
-          <span className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()}
-          </span>
+          <span className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()}</span>
         </div>
         <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-          <Link
-            href="/privacy"
-            className="hover:text-foreground transition-colors"
-          >
+          <Link href="/privacy" className="hover:text-foreground transition-colors">
             Privacy
           </Link>
-          <Link
-            href="/terms"
-            className="hover:text-foreground transition-colors"
-          >
+          <Link href="/terms" className="hover:text-foreground transition-colors">
             Terms
           </Link>
           <a

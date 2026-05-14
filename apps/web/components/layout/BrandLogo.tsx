@@ -1,17 +1,17 @@
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 type BrandLogoProps = {
   className?: string;
   title?: string;
 };
 
-export function BrandLogo({ className, title = "Opinion" }: BrandLogoProps) {
+export function BrandLogo({ className, title = 'Opinion' }: BrandLogoProps) {
   return (
     <svg
       viewBox="0 0 400 80"
       role="img"
       aria-label={title}
-      className={cn("h-8 w-auto shrink-0 text-foreground", className)}
+      className={cn('h-8 w-auto shrink-0 text-foreground', className)}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
     >

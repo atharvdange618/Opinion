@@ -1,11 +1,8 @@
-import { Request, Response } from "express";
-import { syncUser, getMe } from "../services/authService.js";
-import { UnauthorizedError } from "../lib/errors.js";
+import { Request, Response } from 'express';
+import { syncUser, getMe } from '../services/authService.js';
+import { UnauthorizedError } from '../lib/errors.js';
 
-export async function syncUserHandler(
-  req: Request,
-  res: Response,
-): Promise<void> {
+export async function syncUserHandler(req: Request, res: Response): Promise<void> {
   if (!req.user) throw new UnauthorizedError();
   const user = await syncUser(req.user);
   res.json(user);

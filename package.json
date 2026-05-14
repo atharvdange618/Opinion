@@ -10,7 +10,21 @@
     "build:api": "pnpm --filter @opinion/api build",
     "build:web": "pnpm --filter @opinion/web build",
     "build:shared": "pnpm --filter @opinion/shared build",
-    "build": "pnpm run build:shared && pnpm run build:api && pnpm run build:web"
+    "build": "pnpm run build:shared && pnpm run build:api && pnpm run build:web",
+    "prepare": "husky",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   },
   "packageManager": "pnpm@10.32.1",
   "pnpm": {
@@ -21,5 +35,18 @@
   },
   "dependencies": {
     "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
+    "@eslint/js": "^9.39.4",
+    "@next/eslint-plugin-next": "^16.2.6",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.4",
+    "prettier": "^3.8.3",
+    "typescript-eslint": "^8.59.3"
   }
 }

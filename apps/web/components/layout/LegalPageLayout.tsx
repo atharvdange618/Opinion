@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import type { ReactNode } from 'react';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 interface Section {
   id: string;
@@ -52,12 +52,8 @@ export function LegalPageLayout({
           <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
             {title}
           </h1>
-          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            {description}
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground/70">
-            Last updated: {lastUpdated}
-          </p>
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{description}</p>
+          <p className="mt-2 text-sm text-muted-foreground/70">Last updated: {lastUpdated}</p>
         </header>
 
         <div className="grid gap-16 lg:grid-cols-[1fr_220px] lg:gap-24">
