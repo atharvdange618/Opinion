@@ -1,6 +1,7 @@
 import { Router } from 'express';
+
+import { getMeHandler, syncUserHandler } from '../controllers/auth.js';
 import { requireAuth } from '../middleware/auth.js';
-import { syncUserHandler, getMeHandler } from '../controllers/auth.js';
 
 const router = Router();
 

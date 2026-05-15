@@ -1,16 +1,17 @@
-import { Router } from 'express';
-import { requireAuth } from '../middleware/auth.js';
-import { validate } from '../middleware/validate.js';
 import { createPollSchema, updatePollSchema } from '@opinion/shared';
+import { Router } from 'express';
+
 import {
   createPoll,
+  deletePoll,
+  getAnalytics,
   getMyPolls,
   getPoll,
-  updatePoll,
-  deletePoll,
   publishPoll,
-  getAnalytics,
+  updatePoll,
 } from '../controllers/polls.js';
+import { requireAuth } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
 
 const router = Router();
 

@@ -1,19 +1,19 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
-  sub: string;
+  createdAt: Date;
   email: string;
   name: string;
-  picture?: string | null;
-  createdAt: Date;
+  picture?: null | string;
+  sub: string;
 }
 
 const userSchema = new Schema<IUser>(
   {
-    sub: { type: String, required: true, unique: true },
-    email: { type: String, required: true },
-    name: { type: String, required: true },
-    picture: { type: String, default: null },
+    email: { required: true, type: String },
+    name: { required: true, type: String },
+    picture: { default: null, type: String },
+    sub: { required: true, type: String, unique: true },
   },
   { timestamps: true },
 );

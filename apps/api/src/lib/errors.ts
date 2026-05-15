@@ -8,15 +8,9 @@ export class AppError extends Error {
   }
 }
 
-export class NotFoundError extends AppError {
-  constructor(message = 'Resource not found') {
-    super(404, message);
-  }
-}
-
-export class UnauthorizedError extends AppError {
-  constructor(message = 'Not authenticated') {
-    super(401, message);
+export class BadRequestError extends AppError {
+  constructor(message: string) {
+    super(400, message);
   }
 }
 
@@ -26,8 +20,14 @@ export class ForbiddenError extends AppError {
   }
 }
 
-export class BadRequestError extends AppError {
-  constructor(message: string) {
-    super(400, message);
+export class NotFoundError extends AppError {
+  constructor(message = 'Resource not found') {
+    super(404, message);
+  }
+}
+
+export class UnauthorizedError extends AppError {
+  constructor(message = 'Not authenticated') {
+    super(401, message);
   }
 }

@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { initiateLogin, completeAuth, buildLogoutUrl } from '../services/oidcService.js';
+
 import { syncUser } from '../services/authService.js';
+import { buildLogoutUrl, completeAuth, initiateLogin } from '../services/oidcService.js';
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || 'opinion_session';
 const FRONTEND_URL = process.env.PUBLIC_FRONTEND_URL || 'http://localhost:3000';
@@ -25,24 +26,24 @@ router.get('/callback', async (req, res) => {
   }
 
   try {
-    const { sessionJwt, redirectTo, user } = await completeAuth(code, state);
+    const { redirectTo, sessionJwt, user } = await completeAuth(code, state);
 
     await syncUser(user);
 
     res.cookie(SESSION_COOKIE, sessionJwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
       ...(process.env.NODE_ENV === 'production' && {
         domain: '.atharvdangedev.in',
       }),
     });
 
     res.redirect(redirectTo);
-  } catch (err) {
-    console.error('Auth callback failed:', err);
+  } catch (error) {
+    console.error('Auth callback failed:', error);
     res.redirect(`${FRONTEND_URL}/?error=auth_failed`);
   }
 });

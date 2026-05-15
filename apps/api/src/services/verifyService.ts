@@ -1,22 +1,22 @@
-import { SignJWT, jwtVerify } from 'jose';
-import { Poll } from '../models/Poll.js';
+import { jwtVerify, SignJWT } from 'jose';
+
 import { BadRequestError, NotFoundError } from '../lib/errors.js';
+import { Poll } from '../models/Poll.js';
 
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 const VERIFY_SECRET = new TextEncoder().encode(process.env.SESSION_SECRET);
 
-async function verifyTurnstileToken(token: string): Promise<boolean> {
-  const secretKey = process.env.TURNSTILE_SECRET_KEY;
-  if (!secretKey) return false;
+export async function checkVerification(
+  slug: string,
+  cookie: string | undefined,
+): Promise<boolean> {
+  if (!cookie) return false;
 
   try {
-    const res = await fetch(TURNSTILE_VERIFY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ secret: secretKey, response: token }),
+    const { payload } = await jwtVerify(cookie, VERIFY_SECRET, {
+      algorithms: ['HS256'],
     });
-    const data = (await res.json()) as { success: boolean };
-    return data.success;
+    return payload.slug === slug && payload.verified === true;
   } catch {
     return false;
   }
@@ -43,17 +43,18 @@ export async function createVerification(slug: string, turnstileToken: string): 
   return jwt;
 }
 
-export async function checkVerification(
-  slug: string,
-  cookie: string | undefined,
-): Promise<boolean> {
-  if (!cookie) return false;
+async function verifyTurnstileToken(token: string): Promise<boolean> {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+  if (!secretKey) return false;
 
   try {
-    const { payload } = await jwtVerify(cookie, VERIFY_SECRET, {
-      algorithms: ['HS256'],
+    const res = await fetch(TURNSTILE_VERIFY_URL, {
+      body: new URLSearchParams({ response: token, secret: secretKey }),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      method: 'POST',
     });
-    return payload.slug === slug && payload.verified === true;
+    const data = (await res.json()) as { success: boolean };
+    return data.success;
   } catch {
     return false;
   }

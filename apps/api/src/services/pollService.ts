@@ -1,38 +1,29 @@
-import { nanoid } from 'nanoid';
+import type { AnalyticsData, EngagementStats, PollHealthStats } from '@opinion/shared';
+
 import mongoose from 'mongoose';
+import { nanoid } from 'nanoid';
+
+import type { AuthPayload } from '../middleware/auth.js';
+
+import { BadRequestError, NotFoundError } from '../lib/errors.js';
 import { Poll } from '../models/Poll.js';
 import { Question } from '../models/Question.js';
 import { Response as ResponseModel } from '../models/Response.js';
 import { User } from '../models/User.js';
-import { BadRequestError, NotFoundError } from '../lib/errors.js';
-import type { AuthPayload } from '../middleware/auth.js';
-import type { AnalyticsData, EngagementStats, PollHealthStats } from '@opinion/shared';
-
-async function getUserBySub(userInfo: AuthPayload) {
-  const user = await User.findOne({ sub: userInfo.sub });
-  if (!user) throw new NotFoundError('User not found');
-  return user;
-}
-
-async function getOwnPoll(pollId: string, userId: mongoose.Types.ObjectId) {
-  const poll = await Poll.findOne({ _id: pollId, creator: userId });
-  if (!poll) throw new NotFoundError('Poll not found');
-  return poll;
-}
 
 export async function createPoll(
   userInfo: AuthPayload,
   body: {
-    title: string;
     description: string;
     expiresAt: string;
-    responseMode: 'anonymous' | 'authenticated';
     questions: {
-      text: string;
-      options: string[];
       isMandatory: boolean;
+      options: string[];
       order: number;
+      text: string;
     }[];
+    responseMode: 'anonymous' | 'authenticated';
+    title: string;
   },
 ) {
   const user = await getUserBySub(userInfo);
@@ -44,19 +35,19 @@ export async function createPoll(
 
   const poll = await Poll.create({
     creator: user._id,
-    title: body.title,
     description: body.description,
     expiresAt,
     responseMode: body.responseMode,
     slug: nanoid(8),
+    title: body.title,
   });
 
   const questionDocs = body.questions.map((q) => ({
+    isMandatory: q.isMandatory,
+    options: q.options,
+    order: q.order,
     poll: poll._id,
     text: q.text,
-    options: q.options,
-    isMandatory: q.isMandatory,
-    order: q.order,
   }));
 
   await Question.insertMany(questionDocs);
@@ -66,6 +57,94 @@ export async function createPoll(
   });
 
   return { ...poll.toJSON(), questions: createdQuestions };
+}
+
+export async function deletePoll(userInfo: AuthPayload, pollId: string) {
+  const user = await getUserBySub(userInfo);
+  const poll = await getOwnPoll(pollId, user._id);
+
+  const existingResponses = await ResponseModel.countDocuments({
+    poll: poll._id,
+  });
+  if (existingResponses > 0) {
+    throw new BadRequestError('Cannot delete a poll that has responses');
+  }
+
+  await Question.deleteMany({ poll: poll._id });
+  await Poll.deleteOne({ _id: poll._id });
+}
+
+export async function getAnalytics(userInfo: AuthPayload, pollId: string): Promise<AnalyticsData> {
+  const user = await getUserBySub(userInfo);
+  const poll = await getOwnPoll(pollId, user._id);
+
+  const questions = await Question.find({ poll: poll._id }).sort({ order: 1 });
+
+  const totalResponses = await ResponseModel.countDocuments({ poll: poll._id });
+
+  const questionSummaries = await Promise.all(
+    questions.map(async (question) => {
+      const responses = await ResponseModel.find({
+        poll: poll._id,
+        question: question._id,
+      });
+      const totalAnswers = responses.length;
+
+      const optionCounts = question.options.map((option) => {
+        const count = responses.filter((r) => r.selectedOption === option).length;
+        return {
+          count,
+          option,
+          percentage: totalAnswers > 0 ? Math.round((count / totalAnswers) * 100) : 0,
+        };
+      });
+
+      return {
+        options: optionCounts,
+        questionId: question._id.toString(),
+        questionText: question.text,
+        totalAnswers,
+      };
+    }),
+  );
+
+  const allResponses = await ResponseModel.find({ poll: poll._id }).sort({
+    createdAt: 1,
+  });
+
+  const timelineMap = new Map<string, number>();
+  allResponses.forEach((r) => {
+    const date = r.createdAt.toISOString().split('T')[0] as string;
+    timelineMap.set(date, (timelineMap.get(date) || 0) + 1);
+  });
+  const timeline = [...timelineMap.entries()].map(([date, count]) => ({
+    count,
+    date,
+  }));
+
+  const anonymousCount = await ResponseModel.countDocuments({
+    poll: poll._id,
+    respondent: null,
+  });
+  const authenticatedCount = await ResponseModel.countDocuments({
+    poll: poll._id,
+    respondent: { $ne: null },
+  });
+
+  const engagement = computeEngagementStats(allResponses);
+  const pollHealth = computePollHealth(allResponses, questions, poll.createdAt);
+
+  return {
+    engagement,
+    participationInsights: {
+      anonymous: anonymousCount,
+      authenticated: authenticatedCount,
+    },
+    pollHealth,
+    questionSummaries,
+    timeline,
+    totalResponses,
+  };
 }
 
 export async function getMyPolls(userInfo: AuthPayload) {
@@ -94,20 +173,30 @@ export async function getPoll(userInfo: AuthPayload, pollId: string) {
   return { ...poll.toJSON(), questions };
 }
 
+export async function publishPoll(userInfo: AuthPayload, pollId: string) {
+  const user = await getUserBySub(userInfo);
+  const poll = await getOwnPoll(pollId, user._id);
+
+  poll.status = 'published';
+  await poll.save();
+
+  return poll.toJSON();
+}
+
 export async function updatePoll(
   userInfo: AuthPayload,
   pollId: string,
   body: {
-    title?: string;
     description?: string;
     expiresAt?: string;
-    responseMode?: 'anonymous' | 'authenticated';
     questions?: {
-      text: string;
-      options: string[];
       isMandatory: boolean;
+      options: string[];
       order: number;
+      text: string;
     }[];
+    responseMode?: 'anonymous' | 'authenticated';
+    title?: string;
   },
 ) {
   const user = await getUserBySub(userInfo);
@@ -139,11 +228,11 @@ export async function updatePoll(
   if (body.questions) {
     await Question.deleteMany({ poll: poll._id });
     const questionDocs = body.questions.map((q) => ({
+      isMandatory: q.isMandatory,
+      options: q.options,
+      order: q.order,
       poll: poll._id,
       text: q.text,
-      options: q.options,
-      isMandatory: q.isMandatory,
-      order: q.order,
     }));
     await Question.insertMany(questionDocs);
   }
@@ -155,110 +244,12 @@ export async function updatePoll(
   return { ...poll.toJSON(), questions: updatedQuestions };
 }
 
-export async function deletePoll(userInfo: AuthPayload, pollId: string) {
-  const user = await getUserBySub(userInfo);
-  const poll = await getOwnPoll(pollId, user._id);
-
-  const existingResponses = await ResponseModel.countDocuments({
-    poll: poll._id,
-  });
-  if (existingResponses > 0) {
-    throw new BadRequestError('Cannot delete a poll that has responses');
-  }
-
-  await Question.deleteMany({ poll: poll._id });
-  await Poll.deleteOne({ _id: poll._id });
-}
-
-export async function publishPoll(userInfo: AuthPayload, pollId: string) {
-  const user = await getUserBySub(userInfo);
-  const poll = await getOwnPoll(pollId, user._id);
-
-  poll.status = 'published';
-  await poll.save();
-
-  return poll.toJSON();
-}
-
-export async function getAnalytics(userInfo: AuthPayload, pollId: string): Promise<AnalyticsData> {
-  const user = await getUserBySub(userInfo);
-  const poll = await getOwnPoll(pollId, user._id);
-
-  const questions = await Question.find({ poll: poll._id }).sort({ order: 1 });
-
-  const totalResponses = await ResponseModel.countDocuments({ poll: poll._id });
-
-  const questionSummaries = await Promise.all(
-    questions.map(async (question) => {
-      const responses = await ResponseModel.find({
-        poll: poll._id,
-        question: question._id,
-      });
-      const totalAnswers = responses.length;
-
-      const optionCounts = question.options.map((option) => {
-        const count = responses.filter((r) => r.selectedOption === option).length;
-        return {
-          option,
-          count,
-          percentage: totalAnswers > 0 ? Math.round((count / totalAnswers) * 100) : 0,
-        };
-      });
-
-      return {
-        questionId: question._id.toString(),
-        questionText: question.text,
-        options: optionCounts,
-        totalAnswers,
-      };
-    }),
-  );
-
-  const allResponses = await ResponseModel.find({ poll: poll._id }).sort({
-    createdAt: 1,
-  });
-
-  const timelineMap = new Map<string, number>();
-  allResponses.forEach((r) => {
-    const date = r.createdAt.toISOString().split('T')[0];
-    timelineMap.set(date, (timelineMap.get(date) || 0) + 1);
-  });
-  const timeline = Array.from(timelineMap.entries()).map(([date, count]) => ({
-    date,
-    count,
-  }));
-
-  const anonymousCount = await ResponseModel.countDocuments({
-    poll: poll._id,
-    respondent: null,
-  });
-  const authenticatedCount = await ResponseModel.countDocuments({
-    poll: poll._id,
-    respondent: { $ne: null },
-  });
-
-  const engagement = computeEngagementStats(allResponses);
-  const pollHealth = computePollHealth(allResponses, questions, poll.createdAt);
-
-  return {
-    totalResponses,
-    questionSummaries,
-    timeline,
-    participationInsights: {
-      anonymous: anonymousCount,
-      authenticated: authenticatedCount,
-    },
-    engagement,
-    pollHealth,
-  };
-}
-
 function computeEngagementStats(responses: InstanceType<typeof ResponseModel>[]): EngagementStats {
   if (responses.length === 0) {
     return {
       firstResponseAt: null,
       lastResponseAt: null,
-      peakActivity: { hour: null, dayOfWeek: null },
+      peakActivity: { dayOfWeek: null, hour: null },
       uniqueRespondents: 0,
     };
   }
@@ -267,8 +258,8 @@ function computeEngagementStats(responses: InstanceType<typeof ResponseModel>[])
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );
 
-  const firstResponseAt = sortedResponses[0].createdAt.toISOString();
-  const lastResponseAt = sortedResponses[sortedResponses.length - 1].createdAt.toISOString();
+  const firstResponseAt = sortedResponses[0]!.createdAt.toISOString();
+  const lastResponseAt = sortedResponses.at(-1)!.createdAt.toISOString();
 
   const uniqueRespondents = new Set(responses.map((r) => r.respondentId || r._id.toString())).size;
 
@@ -289,8 +280,8 @@ function computeEngagementStats(responses: InstanceType<typeof ResponseModel>[])
     firstResponseAt,
     lastResponseAt,
     peakActivity: {
-      hour: peakHour,
       dayOfWeek: peakDay,
+      hour: peakHour,
     },
     uniqueRespondents,
   };
@@ -305,7 +296,7 @@ function computePollHealth(
 
   const pollDurationHours = Math.round(
     responses.length > 0
-      ? (responses[responses.length - 1].createdAt.getTime() - responses[0].createdAt.getTime()) /
+      ? (responses.at(-1)!.createdAt.getTime() - responses[0]!.createdAt.getTime()) /
           (1000 * 60 * 60)
       : 0,
   );
@@ -331,18 +322,30 @@ function computePollHealth(
     const dropOff = maxVotes > 0 ? Math.round(((maxVotes - questionVotes) / maxVotes) * 100) : 0;
 
     return {
+      dropOff,
+      isMandatory: q.isMandatory,
       questionId: q._id.toString(),
       questionText: q.text,
       totalAnswers: questionVotes,
-      isMandatory: q.isMandatory,
-      dropOff,
     };
   });
 
   return {
+    hoursSinceCreation,
     pollDuration,
     pollDurationHours,
-    hoursSinceCreation,
     votesPerQuestion,
   };
+}
+
+async function getOwnPoll(pollId: string, userId: mongoose.Types.ObjectId) {
+  const poll = await Poll.findOne({ _id: pollId, creator: userId });
+  if (!poll) throw new NotFoundError('Poll not found');
+  return poll;
+}
+
+async function getUserBySub(userInfo: AuthPayload) {
+  const user = await User.findOne({ sub: userInfo.sub });
+  if (!user) throw new NotFoundError('User not found');
+  return user;
 }

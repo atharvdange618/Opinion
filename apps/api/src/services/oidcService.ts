@@ -1,6 +1,7 @@
-import { SignJWT, jwtVerify } from 'jose';
-import { createPkceSession, consumePkceSession } from '../lib/oidc.js';
+import { jwtVerify, SignJWT } from 'jose';
+
 import { BadRequestError } from '../lib/errors.js';
+import { consumePkceSession, createPkceSession } from '../lib/oidc.js';
 
 const IDP_URL = process.env.KLEIS_IDP_URL!;
 const CLIENT_ID = process.env.KLEIS_CLIENT_ID!;
@@ -11,47 +12,34 @@ const SESSION_SECRET = new TextEncoder().encode(process.env.SESSION_SECRET);
 const SESSION_DURATION = 7 * 24 * 60 * 60;
 
 export interface SessionUser {
-  sub: string;
   email: string;
   name: string;
   picture?: string;
+  sub: string;
 }
 
-export async function initiateLogin(
-  redirectTo: string,
-): Promise<{ authorizeUrl: string; state: string }> {
-  const { state, codeChallenge } = await createPkceSession(redirectTo);
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    redirect_uri: `${APP_URL}/api/auth/callback`,
-    response_type: 'code',
-    scope: 'openid profile email',
-    state,
-    code_challenge: codeChallenge,
-    code_challenge_method: 'S256',
-  });
-
-  return { authorizeUrl: `${IDP_URL}/authorize?${params.toString()}`, state };
+export function buildLogoutUrl(): string {
+  return `${IDP_URL}/auth/logout?client_id=${CLIENT_ID}&post_logout_redirect_uri=${encodeURIComponent(FRONTEND_URL)}`;
 }
 
 export async function completeAuth(
   code: string,
   state: string,
-): Promise<{ user: SessionUser; sessionJwt: string; redirectTo: string }> {
+): Promise<{ redirectTo: string; sessionJwt: string; user: SessionUser }> {
   const pkce = await consumePkceSession(state);
   if (!pkce) throw new BadRequestError('Invalid or expired state parameter');
 
   const tokenRes = await fetch(`${IDP_URL}/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: `${APP_URL}/api/auth/callback`,
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
+      code,
       code_verifier: pkce.codeVerifier,
+      grant_type: 'authorization_code',
+      redirect_uri: `${APP_URL}/api/auth/callback`,
     }),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    method: 'POST',
   });
 
   if (!tokenRes.ok) {
@@ -72,12 +60,12 @@ export async function completeAuth(
   const userinfo = await userinfoRes.json();
 
   const user: SessionUser = {
-    sub: userinfo.sub,
     email: userinfo.email,
     name: userinfo.given_name
       ? `${userinfo.given_name} ${userinfo.family_name || ''}`.trim()
       : userinfo.name || userinfo.email,
     picture: userinfo.picture,
+    sub: userinfo.sub,
   };
 
   const sessionJwt = await new SignJWT({ ...user })
@@ -86,25 +74,38 @@ export async function completeAuth(
     .setExpirationTime(`${SESSION_DURATION}s`)
     .sign(SESSION_SECRET);
 
-  return { user, sessionJwt, redirectTo: pkce.redirectTo };
+  return { redirectTo: pkce.redirectTo, sessionJwt, user };
 }
 
-export async function verifySessionJwt(jwt: string): Promise<SessionUser | null> {
+export async function initiateLogin(
+  redirectTo: string,
+): Promise<{ authorizeUrl: string; state: string }> {
+  const { codeChallenge, state } = await createPkceSession(redirectTo);
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256',
+    redirect_uri: `${APP_URL}/api/auth/callback`,
+    response_type: 'code',
+    scope: 'openid profile email',
+    state,
+  });
+
+  return { authorizeUrl: `${IDP_URL}/authorize?${params.toString()}`, state };
+}
+
+export async function verifySessionJwt(jwt: string): Promise<null | SessionUser> {
   try {
     const { payload } = await jwtVerify(jwt, SESSION_SECRET, {
       algorithms: ['HS256'],
     });
     return {
-      sub: payload.sub as string,
       email: payload.email as string,
       name: payload.name as string,
       picture: payload.picture as string | undefined,
+      sub: payload.sub as string,
     };
   } catch {
     return null;
   }
-}
-
-export function buildLogoutUrl(): string {
-  return `${IDP_URL}/auth/logout?client_id=${CLIENT_ID}&post_logout_redirect_uri=${encodeURIComponent(FRONTEND_URL)}`;
 }
