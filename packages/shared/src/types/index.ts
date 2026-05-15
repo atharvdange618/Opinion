@@ -1,104 +1,104 @@
-export interface UserDoc {
-  _id: string;
-  sub: string;
-  email: string;
-  name: string;
-  picture?: string | null;
-  createdAt: string;
+export interface AnalyticsData {
+  engagement: EngagementStats;
+  participationInsights: {
+    anonymous: number;
+    authenticated: number;
+  };
+  pollHealth: PollHealthStats;
+  questionSummaries: QuestionSummary[];
+  timeline: TimelineEntry[];
+  totalResponses: number;
+}
+
+export interface ApiError {
+  code?: string;
+  message: string;
+}
+
+export interface EngagementStats {
+  firstResponseAt: null | string;
+  lastResponseAt: null | string;
+  peakActivity: {
+    dayOfWeek: null | number;
+    hour: null | number;
+  };
+  uniqueRespondents: number;
+}
+
+export interface OptionCount {
+  count: number;
+  option: string;
+  percentage: number;
 }
 
 export interface PollDoc {
   _id: string;
+  createdAt: string;
   creator: string;
-  title: string;
   description: string;
   expiresAt: string;
   responseMode: 'anonymous' | 'authenticated';
-  status: 'active' | 'expired' | 'published';
   slug: string;
-  createdAt: string;
+  status: 'active' | 'expired' | 'published';
+  title: string;
 }
 
-export interface QuestionDoc {
-  _id: string;
-  poll: string;
-  text: string;
-  options: string[];
-  isMandatory: boolean;
-  order: number;
-}
-
-export interface ResponseDoc {
-  _id: string;
-  poll: string;
-  question: string;
-  respondent?: string | null;
-  selectedOption: string;
-  respondentId?: string;
-  fingerprint?: string;
-  createdAt: string;
+export interface PollHealthStats {
+  hoursSinceCreation: number;
+  pollDuration: string;
+  pollDurationHours: number;
+  votesPerQuestion: VotesPerQuestion[];
 }
 
 export interface PollWithQuestions extends PollDoc {
   questions: QuestionDoc[];
 }
 
-export interface AnalyticsData {
-  totalResponses: number;
-  questionSummaries: QuestionSummary[];
-  timeline: TimelineEntry[];
-  participationInsights: {
-    anonymous: number;
-    authenticated: number;
-  };
-  engagement: EngagementStats;
-  pollHealth: PollHealthStats;
-}
-
-export interface EngagementStats {
-  firstResponseAt: string | null;
-  lastResponseAt: string | null;
-  peakActivity: {
-    hour: number | null;
-    dayOfWeek: number | null;
-  };
-  uniqueRespondents: number;
-}
-
-export interface PollHealthStats {
-  pollDuration: string;
-  pollDurationHours: number;
-  hoursSinceCreation: number;
-  votesPerQuestion: VotesPerQuestion[];
-}
-
-export interface VotesPerQuestion {
-  questionId: string;
-  questionText: string;
-  totalAnswers: number;
+export interface QuestionDoc {
+  _id: string;
   isMandatory: boolean;
-  dropOff: number;
+  options: string[];
+  order: number;
+  poll: string;
+  text: string;
 }
 
 export interface QuestionSummary {
+  options: OptionCount[];
   questionId: string;
   questionText: string;
-  options: OptionCount[];
   totalAnswers: number;
 }
 
-export interface OptionCount {
-  option: string;
-  count: number;
-  percentage: number;
+export interface ResponseDoc {
+  _id: string;
+  createdAt: string;
+  fingerprint?: string;
+  poll: string;
+  question: string;
+  respondent?: null | string;
+  respondentId?: string;
+  selectedOption: string;
 }
 
 export interface TimelineEntry {
-  date: string;
   count: number;
+  date: string;
 }
 
-export interface ApiError {
-  message: string;
-  code?: string;
+export interface UserDoc {
+  _id: string;
+  createdAt: string;
+  email: string;
+  name: string;
+  picture?: null | string;
+  sub: string;
+}
+
+export interface VotesPerQuestion {
+  dropOff: number;
+  isMandatory: boolean;
+  questionId: string;
+  questionText: string;
+  totalAnswers: number;
 }
