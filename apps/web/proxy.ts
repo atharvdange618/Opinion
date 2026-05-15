@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+
+import { NextResponse } from 'next/server';
 
 const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || 'opinion_session';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -30,5 +31,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next|.*\\..*).*)'],
+  matcher: [String.raw`/((?!_next|.*\..*).*)`],
 };

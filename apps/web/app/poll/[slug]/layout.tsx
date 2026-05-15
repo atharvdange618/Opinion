@@ -15,15 +15,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (res.ok) {
       const poll = await res.json();
       return {
-        title: poll.title,
         description: `Take the poll "${poll.title}" on Opinion. ${
           poll.description || 'Share your opinion anonymously or with authentication.'
         }`,
         openGraph: {
-          title: `${poll.title} - Opinion`,
           description: `Take the poll "${poll.title}" on Opinion. Share your opinion.`,
           images: ['/og-image.png'],
+          title: `${poll.title} - Opinion`,
         },
+        title: poll.title,
       };
     }
   } catch {
@@ -31,8 +31,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: 'Poll',
     description: 'Take a poll on Opinion. Share your opinion anonymously or with authentication.',
+    title: 'Poll',
   };
 }
 

@@ -1,35 +1,36 @@
 'use client';
 
+import { BarChart3, PenLine, Share2 } from 'lucide-react';
+
 import { useInView } from '@/hooks/useInView';
 import { cn } from '@/lib/utils';
-import { PenLine, Share2, BarChart3 } from 'lucide-react';
 
 const steps = [
   {
-    icon: PenLine,
-    title: 'Create your poll',
     description:
       'Add questions, set anonymous or authenticated mode, pick an expiry. Takes under a minute.',
+    icon: PenLine,
+    title: 'Create your poll',
   },
   {
-    icon: Share2,
-    title: 'Share the link',
     description:
       'One URL works everywhere - email, social, Slack, or embedded right on your page. No sign-up needed to respond.',
+    icon: Share2,
+    title: 'Share the link',
   },
   {
-    icon: BarChart3,
-    title: 'Watch responses live',
     description:
       'Results appears as they come in. Per-question breakdowns, response timelines, and participation insights update in real time.',
+    icon: BarChart3,
+    title: 'Watch responses live',
   },
 ];
 
 export function HowItWorks() {
-  const { ref, inView } = useInView({ threshold: 0.1 });
+  const { inView, ref } = useInView({ threshold: 0.1 });
 
   return (
-    <section ref={ref} className="px-4 py-24 sm:py-32">
+    <section className="px-4 py-24 sm:py-32" ref={ref}>
       <div className="mx-auto max-w-6xl">
         <div
           className={cn(
@@ -51,12 +52,12 @@ export function HowItWorks() {
         <div className="grid gap-10 md:grid-cols-3 md:gap-6">
           {steps.map((step, i) => (
             <div
-              key={step.title}
-              style={{ transitionDelay: `${i * 200}ms` }}
               className={cn(
                 'relative transition-all duration-700 ease-out',
                 inView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
               )}
+              key={step.title}
+              style={{ transitionDelay: `${i * 200}ms` }}
             >
               {i < steps.length - 1 && (
                 <div className="absolute left-12 top-8 hidden h-[calc(100%-1rem)] w-px md:block" />

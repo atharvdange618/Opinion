@@ -1,34 +1,35 @@
 'use client';
 
+import { BarChart3, Eye, Share2 } from 'lucide-react';
+
 import { useInView } from '@/hooks/useInView';
-import { BarChart3, Share2, Eye } from 'lucide-react';
 
 const features = [
   {
-    icon: BarChart3,
-    title: 'Real-time analytics',
-    description: 'Watch responses come in live. See charts and insights as they happen.',
     className: 'sm:col-span-2 lg:col-span-1',
+    description: 'Watch responses come in live. See charts and insights as they happen.',
+    icon: BarChart3,
     iconBg: 'bg-primary/10 text-primary',
+    title: 'Real-time analytics',
   },
   {
-    icon: Share2,
-    title: 'Share with a link',
+    className: '',
     description: 'One link is all you need. Share it anywhere - email, social, or embed.',
-    className: '',
+    icon: Share2,
     iconBg: 'bg-secondary text-secondary-foreground',
+    title: 'Share with a link',
   },
   {
-    icon: Eye,
-    title: 'Flexible privacy',
-    description: 'Anonymous or authenticated responses. You control who participates.',
     className: '',
+    description: 'Anonymous or authenticated responses. You control who participates.',
+    icon: Eye,
     iconBg: 'bg-accent text-accent-foreground',
+    title: 'Flexible privacy',
   },
 ];
 
 export function AnimatedFeatures() {
-  const { ref, inView } = useInView({ threshold: 0.15 });
+  const { inView, ref } = useInView({ threshold: 0.15 });
 
   return (
     <section className="relative overflow-hidden px-4 py-20" ref={ref}>
@@ -51,11 +52,11 @@ export function AnimatedFeatures() {
         <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, i) => (
             <div
-              key={feature.title}
-              style={{ transitionDelay: `${(i + 1) * 200}ms` }}
               className={`rounded-xl border bg-card p-6 transition-all duration-1000 ease-out hover:-translate-y-1 hover:shadow-lg ${
                 inView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               } ${feature.className}`}
+              key={feature.title}
+              style={{ transitionDelay: `${(i + 1) * 200}ms` }}
             >
               <div
                 className={`mb-4 flex size-10 items-center justify-center rounded-lg ${feature.iconBg}`}

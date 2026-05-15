@@ -1,26 +1,27 @@
 'use client';
 
-import * as React from 'react';
-import { format } from 'date-fns';
 import { CalendarBlank, Clock } from '@phosphor-icons/react';
-import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import * as React from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface DateTimePickerProps {
   date?: Date;
+  disabled?: boolean;
   onDateChange: (date: Date | undefined) => void;
   placeholder?: string;
-  disabled?: boolean;
 }
 
 export function DateTimePicker({
   date,
+  disabled = false,
   onDateChange,
   placeholder = 'Pick a date and time',
-  disabled = false,
 }: DateTimePickerProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(date);
@@ -49,7 +50,7 @@ export function DateTimePicker({
       return;
     }
 
-    const [hours, minutes] = timeValue.split(':').map((v) => parseInt(v, 10));
+    const [hours, minutes] = timeValue.split(':').map((v) => Number.parseInt(v, 10));
 
     const dateWithTime = new Date(newDate);
     dateWithTime.setHours(hours || 0);
@@ -75,13 +76,13 @@ export function DateTimePicker({
 
     if (!selectedDate) return;
 
-    const [hours, minutes] = newTime.split(':').map((v) => parseInt(v, 10));
+    const [hours, minutes] = newTime.split(':').map((v) => Number.parseInt(v, 10));
 
-    if (isNaN(hours) || isNaN(minutes)) return;
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return;
 
     const newDate = new Date(selectedDate);
-    newDate.setHours(hours);
-    newDate.setMinutes(minutes);
+    newDate.setHours(hours!);
+    newDate.setMinutes(minutes!);
 
     const now = new Date();
     const isToday =
@@ -109,46 +110,46 @@ export function DateTimePicker({
   }, [selectedDate]);
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover onOpenChange={setIsOpen} open={isOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          disabled={disabled}
           className={cn(
             'w-full justify-start text-left font-normal',
             !selectedDate && 'text-muted-foreground',
           )}
+          disabled={disabled}
+          variant="outline"
         >
-          <CalendarBlank size={16} className="mr-2" />
+          <CalendarBlank className="mr-2" size={16} />
           {selectedDate ? format(selectedDate, "PPP 'at' h:mm a") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent align="start" className="w-auto p-0">
         <div className="flex flex-col">
           <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleDateSelect}
             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+            mode="single"
+            onSelect={handleDateSelect}
+            selected={selectedDate}
           />
           <div className="border-t border-border p-3">
             <div className="flex items-center gap-2">
-              <Clock size={16} className="text-muted-foreground" />
+              <Clock className="text-muted-foreground" size={16} />
               <Input
-                type="time"
-                value={timeValue}
+                className="h-8"
                 min={minTime}
                 onChange={(e) => handleTimeChange(e.target.value)}
-                className="h-8"
+                type="time"
+                value={timeValue}
               />
             </div>
             <p className="text-xs text-muted-foreground mt-2">Time: {timeValue}</p>
           </div>
           <div className="border-t border-border p-2 flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsOpen(false)}>
+            <Button onClick={() => setIsOpen(false)} size="sm" variant="outline">
               Cancel
             </Button>
-            <Button size="sm" onClick={() => setIsOpen(false)}>
+            <Button onClick={() => setIsOpen(false)} size="sm">
               Confirm
             </Button>
           </div>

@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { NotFoundArt } from '@/components/illustrations/NotFoundArt';
+
 import { Home } from 'lucide-react';
+import Link from 'next/link';
+
+import { NotFoundArt } from '@/components/illustrations/NotFoundArt';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
-  title: '404 - Page Not Found',
   description: "The page you're looking for doesn't exist on Opinion.",
+  title: '404 - Page Not Found',
 };
 
 export default function NotFound() {
@@ -16,7 +18,7 @@ export default function NotFound() {
         <NotFoundArt />
         <h1 className="mt-6 font-heading text-4xl font-semibold">404</h1>
         <p className="mt-2 text-muted-foreground">This page doesn&apos;t exist.</p>
-        <Button className="mt-8" asChild>
+        <Button asChild className="mt-8">
           <Link href="/">
             <Home className="mr-2 size-4" />
             Go home

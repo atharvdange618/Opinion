@@ -2,18 +2,15 @@ export function JsonLd() {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'Opinion',
-    url: 'https://opinion.atharvdangedev.in',
     applicationCategory: 'WebApplication',
-    operatingSystem: 'All',
+    author: {
+      '@type': 'Organization',
+      name: 'Opinion',
+      url: 'https://opinion.atharvdangedev.in',
+    },
     browserRequirements: 'Requires JavaScript',
     description:
       'Create polls, collect anonymous or verified feedback, and analyze responses in real-time.',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
     featureList: [
       'Anonymous or authenticated polling',
       'Live analytics dashboard',
@@ -22,17 +19,20 @@ export function JsonLd() {
       'Shareable poll links',
       'Auto-expiry for polls',
     ],
-    author: {
-      '@type': 'Organization',
-      name: 'Opinion',
-      url: 'https://opinion.atharvdangedev.in',
+    name: 'Opinion',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
     },
+    operatingSystem: 'All',
+    url: 'https://opinion.atharvdangedev.in',
   };
 
   return (
     <script
-      type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      type="application/ld+json"
     />
   );
 }

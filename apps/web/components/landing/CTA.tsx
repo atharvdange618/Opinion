@@ -1,18 +1,19 @@
 'use client';
 
-import Link from 'next/link';
-import { useInView } from '@/hooks/useInView';
-import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
+import { useInView } from '@/hooks/useInView';
 import { cn } from '@/lib/utils';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export function CTA({ hasSession }: { hasSession: boolean }) {
-  const { ref, inView } = useInView({ threshold: 0.3 });
+  const { inView, ref } = useInView({ threshold: 0.3 });
 
   return (
-    <section ref={ref} className="px-4 py-24 sm:py-32">
+    <section className="px-4 py-24 sm:py-32" ref={ref}>
       <div className="mx-auto max-w-6xl">
         <div
           className={cn(
@@ -32,7 +33,7 @@ export function CTA({ hasSession }: { hasSession: boolean }) {
             </p>
           </div>
           <div className="shrink-0">
-            <Button size="lg" asChild className="group/btn">
+            <Button asChild className="group/btn" size="lg">
               <Link
                 href={
                   hasSession

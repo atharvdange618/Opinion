@@ -1,19 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { ArrowUpRight } from '@phosphor-icons/react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
 } from 'recharts';
+
+import { Button } from '@/components/ui/button';
 
 const chartData = [
   { option: 'Turborepo', votes: 58 },
@@ -31,27 +32,7 @@ const CHART_COLORS = [
   'var(--color-chart-5)',
 ];
 
-function ChartTooltip({
-  active,
-  payload,
-  label,
-}: {
-  active?: boolean;
-  payload?: { value: number }[];
-  label?: string;
-}) {
-  if (active && payload?.length) {
-    return (
-      <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-md">
-        <p className="font-medium text-foreground">{label}</p>
-        <p className="text-muted-foreground">{payload[0].value} responses</p>
-      </div>
-    );
-  }
-  return null;
-}
-
-export function Hero({ hasSession, apiUrl }: { hasSession: boolean; apiUrl: string }) {
+export function Hero({ apiUrl, hasSession }: { apiUrl: string; hasSession: boolean }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -88,7 +69,7 @@ export function Hero({ hasSession, apiUrl }: { hasSession: boolean; apiUrl: stri
                 mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               }`}
             >
-              <Button size="lg" asChild className="group/btn">
+              <Button asChild className="group/btn" size="lg">
                 <Link
                   href={
                     hasSession
@@ -99,12 +80,12 @@ export function Hero({ hasSession, apiUrl }: { hasSession: boolean; apiUrl: stri
                   <span className="flex items-center">
                     Create your first poll
                     <span className="ml-3 flex size-6 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 group-active/btn:scale-95">
-                      <ArrowUpRight weight="bold" className="size-3.5" />
+                      <ArrowUpRight className="size-3.5" weight="bold" />
                     </span>
                   </span>
                 </Link>
               </Button>
-              <Button variant="ghost" size="lg" asChild>
+              <Button asChild size="lg" variant="ghost">
                 <Link href={hasSession ? '/dashboard' : `${apiUrl}/api/auth/login`}>
                   {hasSession ? 'Go to dashboard' : 'Sign in'}
                 </Link>
@@ -128,39 +109,39 @@ export function Hero({ hasSession, apiUrl }: { hasSession: boolean; apiUrl: stri
                   Your preferred monorepo tool?
                 </h3>
                 <div className="h-[220px]">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer height="100%" width="100%">
                     <BarChart
-                      data={chartData}
                       barCategoryGap="30%"
-                      margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+                      data={chartData}
+                      margin={{ bottom: 0, left: -20, right: 4, top: 4 }}
                     >
                       <CartesianGrid
-                        vertical={false}
                         stroke="var(--color-border)"
-                        strokeOpacity={0.4}
                         strokeDasharray="4 4"
+                        strokeOpacity={0.4}
+                        vertical={false}
                       />
                       <XAxis
-                        dataKey="option"
                         axisLine={false}
-                        tickLine={false}
+                        dataKey="option"
                         tick={{
-                          fontSize: 12,
                           fill: 'var(--color-muted-foreground)',
+                          fontSize: 12,
                         }}
+                        tickLine={false}
                       />
                       <YAxis
                         axisLine={false}
-                        tickLine={false}
                         tick={{
-                          fontSize: 11,
                           fill: 'var(--color-muted-foreground)',
+                          fontSize: 11,
                         }}
+                        tickLine={false}
                       />
                       <Tooltip content={<ChartTooltip />} cursor={{ opacity: 0.08 }} />
                       <Bar dataKey="votes" radius={[6, 6, 0, 0]}>
                         {chartData.map((_, i) => (
-                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                          <Cell fill={CHART_COLORS[i % CHART_COLORS.length]} key={i} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -177,4 +158,24 @@ export function Hero({ hasSession, apiUrl }: { hasSession: boolean; apiUrl: stri
       </div>
     </section>
   );
+}
+
+function ChartTooltip({
+  active,
+  label,
+  payload,
+}: {
+  active?: boolean;
+  label?: string;
+  payload?: { value: number }[];
+}) {
+  if (active && payload?.length) {
+    return (
+      <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-md">
+        <p className="font-medium text-foreground">{label}</p>
+        <p className="text-muted-foreground">{payload[0]!.value} responses</p>
+      </div>
+    );
+  }
+  return null;
 }

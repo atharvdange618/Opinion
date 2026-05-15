@@ -12,7 +12,7 @@ export function useInView(options?: IntersectionObserverInit) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry!.isIntersecting) {
           setInView(true);
           observer.unobserve(el);
         }
@@ -24,5 +24,5 @@ export function useInView(options?: IntersectionObserverInit) {
     return () => observer.disconnect();
   }, [options]);
 
-  return { ref, inView };
+  return { inView, ref };
 }

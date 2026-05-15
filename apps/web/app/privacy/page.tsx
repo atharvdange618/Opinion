@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
+
 import { ShieldCheck } from 'lucide-react';
+
 import { LegalPageLayout } from '@/components/layout/LegalPageLayout';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy',
   description:
     "Opinion's privacy policy. Learn how we collect, use, and protect your data. We never sell your information and use only essential cookies.",
+  title: 'Privacy Policy',
 };
 
 const sections = [
@@ -21,14 +23,14 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <LegalPageLayout
-      icon={<ShieldCheck className="size-5 text-primary" />}
       badge="Legal"
-      title="Privacy Policy"
-      lastUpdated="May 2026"
       description="We believe in complete transparency about how we handle your data."
+      icon={<ShieldCheck className="size-5 text-primary" />}
+      lastUpdated="May 2026"
       sections={sections}
+      title="Privacy Policy"
     >
-      <section id="information" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="information">
         <SectionHeader num="01" title="Information We Collect" />
         <p className="mb-4 text-base leading-relaxed text-foreground">
           When you sign in using your identity provider, we receive your basic profile information
@@ -43,7 +45,7 @@ export default function PrivacyPage() {
         </p>
       </section>
 
-      <section id="how-we-use" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="how-we-use">
         <SectionHeader num="02" title="How We Use Your Data" />
         <p className="mb-4 text-base leading-relaxed text-foreground">
           Your data powers the core functionality of Opinion. We use it exclusively to:
@@ -55,7 +57,7 @@ export default function PrivacyPage() {
             'Generate and display accurate poll analytics and results',
             'Monitor platform health and improve user experience',
           ].map((item) => (
-            <li key={item} className="flex items-start gap-3 text-base text-foreground">
+            <li className="flex items-start gap-3 text-base text-foreground" key={item}>
               <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-primary" />
               {item}
             </li>
@@ -63,7 +65,7 @@ export default function PrivacyPage() {
         </ul>
       </section>
 
-      <section id="third-party" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="third-party">
         <SectionHeader num="03" title="Third-Party Services" />
         <p className="mb-4 text-base leading-relaxed text-foreground">
           Opinion integrates with a minimal set of third-party services to operate securely and
@@ -99,7 +101,7 @@ export default function PrivacyPage() {
         </p>
       </section>
 
-      <section id="storage" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="storage">
         <SectionHeader num="04" title="Data Storage & Security" />
         <p className="text-base leading-relaxed text-foreground">
           We employ industry-standard security measures to protect your information. Your data is
@@ -110,7 +112,7 @@ export default function PrivacyPage() {
         </p>
       </section>
 
-      <section id="cookies" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="cookies">
         <SectionHeader num="05" title="Cookies & Tracking" />
         <p className="text-base leading-relaxed text-foreground">
           Opinion respects your digital footprint. We use a single, strictly necessary session
@@ -120,7 +122,7 @@ export default function PrivacyPage() {
         </p>
       </section>
 
-      <section id="rights" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="rights">
         <SectionHeader num="06" title="Your Rights" />
         <p className="mb-4 text-base leading-relaxed text-foreground">
           You have full control over your personal data. Under applicable data protection laws, you
@@ -133,7 +135,7 @@ export default function PrivacyPage() {
             'Right to erasure  request permanent deletion of your account and associated data',
             'Right to data portability  export your data in a machine-readable format',
           ].map((item) => (
-            <li key={item} className="flex items-start gap-3 text-base text-foreground">
+            <li className="flex items-start gap-3 text-base text-foreground" key={item}>
               <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-primary" />
               <span dangerouslySetInnerHTML={{ __html: item }} />
             </li>
@@ -141,16 +143,16 @@ export default function PrivacyPage() {
         </ul>
       </section>
 
-      <section id="contact" className="scroll-mt-28">
+      <section className="scroll-mt-28" id="contact">
         <SectionHeader num="07" title="Contact & Support" />
         <p className="text-base leading-relaxed text-foreground">
           If you have any concerns about our privacy practices, data handling, or wish to exercise
           your privacy rights, please reach out directly through our{' '}
           <a
-            href="https://github.com/atharvdange618/Opinion/issues"
-            target="_blank"
-            rel="noopener noreferrer"
             className="font-medium text-primary underline-offset-2 hover:underline"
+            href="https://github.com/atharvdange618/Opinion/issues"
+            rel="noopener noreferrer"
+            target="_blank"
           >
             GitHub repository issues page
           </a>

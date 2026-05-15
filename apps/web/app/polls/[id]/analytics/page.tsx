@@ -1,38 +1,40 @@
 'use client';
 
-import { use, useEffect, useMemo, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
-import { getSocket } from '@/lib/socket';
+import type { AnalyticsData } from '@opinion/shared';
+
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  AreaChart,
+  ActivityIcon,
+  ArrowUpRight,
+  CheckCircle,
+  Clock,
+  Copy,
+  Eye,
+  ShareNetwork,
+  Shield,
+  ShieldCheck,
+  TrendDown,
+  Users,
+} from '@phosphor-icons/react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { use, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+
+import {
   Area,
+  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
   Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from '@/components/Charts';
-import type { AnalyticsData } from '@opinion/shared';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
-import {
-  Copy,
-  ShareNetwork,
-  CheckCircle,
-  Users,
-  Clock,
-  TrendDown,
-  ArrowUpRight,
-  Eye,
-  ActivityIcon,
-  ShieldCheck,
-  Shield,
-} from '@phosphor-icons/react';
+import { api } from '@/lib/api';
+import { getSocket } from '@/lib/socket';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const HOURS = Array.from({ length: 24 }, (_, i) => {
@@ -66,19 +68,19 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   }, []);
 
   const { data: analytics, isLoading } = useQuery({
-    queryKey: ['analytics', id],
     queryFn: async () => {
       const { data } = await api.get<AnalyticsData>(`/polls/${id}/analytics`);
       return data;
     },
+    queryKey: ['analytics', id],
   });
 
   const { data: poll } = useQuery({
-    queryKey: ['poll', id],
     queryFn: async () => {
       const { data } = await api.get(`/polls/${id}`);
       return data;
     },
+    queryKey: ['poll', id],
   });
 
   useEffect(() => {
@@ -112,7 +114,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     if (!poll?.slug) return;
     setCopying(true);
 
-    const url = `${window.location.origin}/poll/${poll.slug}`;
+    const url = `${globalThis.location.origin}/poll/${poll.slug}`;
 
     function done(success: boolean) {
       if (success) {
@@ -133,10 +135,10 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       textarea.value = url;
       textarea.style.position = 'fixed';
       textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
+      document.body.append(textarea);
       textarea.select();
       done(document.execCommand('copy'));
-      document.body.removeChild(textarea);
+      textarea.remove();
     }
   }
 
@@ -150,9 +152,9 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const peakHour = analytics?.engagement.peakActivity.hour ?? null;
   const peakDay = analytics?.engagement.peakActivity.dayOfWeek ?? null;
   const peakTime =
-    peakHour !== null
-      ? `${HOURS[peakHour]}${peakDay !== null ? ' on ' + DAYS[peakDay] : ''}`
-      : null;
+    peakHour === null
+      ? null
+      : `${HOURS[peakHour]}${peakDay === null ? '' : ' on ' + DAYS[peakDay]}`;
 
   const totalQuestions = analytics?.questionSummaries.length ?? 0;
   const maxVotes = analytics?.pollHealth.votesPerQuestion
@@ -175,7 +177,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         <Skeleton className="mb-4 h-10 w-72" />
         <div className="mb-16 grid grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-2xl" />
+            <Skeleton className="h-28 rounded-2xl" key={i} />
           ))}
         </div>
         <Skeleton className="mb-8 h-72 rounded-2xl" />
@@ -202,16 +204,16 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
             </span>
             <span className="text-muted-foreground/30">/</span>
             <a
-              href={`/poll/${poll?.slug}`}
               className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+              href={`/poll/${poll?.slug}`}
             >
-              <ArrowUpRight weight="bold" className="size-3" />
+              <ArrowUpRight className="size-3" weight="bold" />
               /poll/{poll?.slug}
             </a>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleCopyLink} disabled={copying}>
+          <Button disabled={copying} onClick={handleCopyLink} variant="outline">
             {copying ? (
               <CheckCircle className="mr-2 size-4 text-success" weight="bold" />
             ) : (
@@ -220,7 +222,12 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
             Copy link
           </Button>
           {poll?.status !== 'published' && (
-            <Button onClick={() => { void handlePublish(); }} disabled={publishing}>
+            <Button
+              disabled={publishing}
+              onClick={() => {
+                void handlePublish();
+              }}
+            >
               <ShareNetwork className="mr-2 size-4" weight="bold" />
               {publishing ? 'Publishing' : 'Publish results'}
             </Button>
@@ -232,7 +239,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border/40 bg-border/40 sm:grid-cols-12">
           <div className="col-span-12 bg-card px-8 py-7 sm:col-span-5">
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Users weight="bold" className="size-4" />
+              <Users className="size-4" weight="bold" />
               Total Responses
             </p>
             <p className="mt-2 font-heading text-5xl font-semibold tabular-nums tracking-tight text-foreground">
@@ -240,11 +247,11 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
             </p>
             <div className="mt-4 flex items-center gap-4">
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Shield weight="bold" className="size-3" />
+                <Shield className="size-3" weight="bold" />
                 {analytics?.participationInsights.anonymous ?? 0} anonymous
               </span>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <ShieldCheck weight="bold" className="size-3" />
+                <ShieldCheck className="size-3" weight="bold" />
                 {analytics?.participationInsights.authenticated ?? 0} authenticated
               </span>
             </div>
@@ -264,7 +271,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
           <div className="col-span-12 bg-card px-8 py-7 sm:col-span-3">
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <ActivityIcon weight="bold" className="size-4" />
+              <ActivityIcon className="size-4" weight="bold" />
               Peak activity
             </p>
             <p className="mt-2 font-heading text-3xl font-semibold tabular-nums text-foreground">
@@ -279,7 +286,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
           <div className="col-span-12 bg-card px-8 py-7 sm:col-span-2">
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Clock weight="bold" className="size-4" />
+              <Clock className="size-4" weight="bold" />
               Duration
             </p>
             <p className="mt-2 font-heading text-3xl font-semibold tabular-nums text-foreground">
@@ -292,17 +299,17 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
           <div className="col-span-12 bg-card px-8 py-7 sm:col-span-2">
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <TrendDown weight="bold" className="size-4" />
+              <TrendDown className="size-4" weight="bold" />
               Drop-off
             </p>
             <p className="mt-2 font-heading text-3xl font-semibold tabular-nums text-foreground">
-              {dropOff !== null ? (
+              {dropOff === null ? (
+                <span className="text-base font-normal text-muted-foreground">N/A</span>
+              ) : (
                 <>
                   {dropOff}
                   <span className="ml-0.5 text-base font-normal text-muted-foreground">%</span>
                 </>
-              ) : (
-                <span className="text-base font-normal text-muted-foreground">N/A</span>
               )}
             </p>
             {dropOff !== null && (
@@ -323,69 +330,69 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                 <p className="mt-0.5 text-sm text-muted-foreground">Daily response volume</p>
               </div>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Eye weight="bold" className="size-3" />
+                <Eye className="size-3" weight="bold" />
                 {analytics.timeline.reduce((s, e) => s + e.count, 0)} total
               </span>
             </div>
             <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer height="100%" width="100%">
                 <AreaChart
                   data={analytics.timeline}
-                  margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+                  margin={{ bottom: 0, left: -20, right: 4, top: 4 }}
                 >
                   <defs>
-                    <linearGradient id="timelineFill" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="timelineFill" x1="0" x2="0" y1="0" y2="1">
                       <stop offset="0%" stopColor="var(--color-chart-1)" stopOpacity={0.2} />
                       <stop offset="100%" stopColor="var(--color-chart-1)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
-                    strokeDasharray="3 3"
                     stroke="var(--color-border)"
+                    strokeDasharray="3 3"
                     strokeOpacity={0.4}
                     vertical={false}
                   />
                   <XAxis
+                    axisLine={false}
                     dataKey="date"
+                    dy={10}
                     tick={{
                       fill: 'currentColor',
-                      opacity: 0.4,
                       fontSize: 12,
+                      opacity: 0.4,
                     }}
-                    axisLine={false}
                     tickLine={false}
-                    dy={10}
                   />
                   <YAxis
+                    allowDecimals={false}
+                    axisLine={false}
+                    dx={-10}
                     tick={{
                       fill: 'currentColor',
-                      opacity: 0.4,
                       fontSize: 12,
+                      opacity: 0.4,
                     }}
-                    axisLine={false}
                     tickLine={false}
-                    dx={-10}
-                    allowDecimals={false}
                   />
                   <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--color-card)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                      fontSize: '13px',
+                    }}
                     cursor={{
                       stroke: 'var(--color-border)',
                       strokeOpacity: 0.6,
                     }}
-                    contentStyle={{
-                      borderRadius: '8px',
-                      border: '1px solid var(--color-border)',
-                      backgroundColor: 'var(--color-card)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                      fontSize: '13px',
-                    }}
                   />
                   <Area
-                    type="monotone"
                     dataKey="count"
+                    fill="url(#timelineFill)"
                     stroke="var(--color-chart-1)"
                     strokeWidth={2}
-                    fill="url(#timelineFill)"
+                    type="monotone"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -413,10 +420,10 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
               return (
                 <div
-                  key={summary.questionId}
                   className={`rounded-2xl border border-border/40 bg-card p-8 ${
                     isLastOdd ? 'lg:col-span-2' : ''
                   }`}
+                  key={summary.questionId}
                 >
                   <div className="mb-6">
                     <h3 className="font-heading text-base font-semibold leading-snug text-foreground">
@@ -424,7 +431,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                     </h3>
                     <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Users weight="bold" className="size-3" />
+                        <Users className="size-3" weight="bold" />
                         {summary.totalAnswers} answers
                       </span>
                       <span className="text-muted-foreground/30">/</span>
@@ -435,61 +442,61 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                   </div>
 
                   <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer height="100%" width="100%">
                       <BarChart
                         data={summary.options}
                         margin={{
-                          top: 8,
-                          right: 8,
-                          left: -20,
                           bottom: 0,
+                          left: -20,
+                          right: 8,
+                          top: 8,
                         }}
                       >
                         <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="var(--color-border)"
-                          strokeOpacity={0.3}
                           horizontal={true}
+                          stroke="var(--color-border)"
+                          strokeDasharray="3 3"
+                          strokeOpacity={0.3}
                           vertical={false}
                         />
                         <XAxis
+                          axisLine={false}
                           dataKey="option"
+                          dy={10}
                           tick={{
                             fill: 'currentColor',
-                            opacity: 0.5,
                             fontSize: 12,
+                            opacity: 0.5,
                           }}
-                          axisLine={false}
                           tickLine={false}
-                          dy={10}
                         />
                         <YAxis
+                          allowDecimals={false}
+                          axisLine={false}
+                          dx={-10}
                           tick={{
                             fill: 'currentColor',
-                            opacity: 0.5,
                             fontSize: 12,
+                            opacity: 0.5,
                           }}
-                          axisLine={false}
                           tickLine={false}
-                          dx={-10}
-                          allowDecimals={false}
                         />
                         <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'var(--color-card)',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                            fontSize: '13px',
+                          }}
                           cursor={{
                             fill: 'var(--color-chart-1)',
                             opacity: 0.05,
                           }}
-                          contentStyle={{
-                            borderRadius: '8px',
-                            border: '1px solid var(--color-border)',
-                            backgroundColor: 'var(--color-card)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                            fontSize: '13px',
-                          }}
                         />
-                        <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={48}>
+                        <Bar dataKey="count" maxBarSize={48} radius={[4, 4, 0, 0]}>
                           {summary.options.map((_, i) => (
-                            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                            <Cell fill={CHART_COLORS[i % CHART_COLORS.length]} key={i} />
                           ))}
                         </Bar>
                       </BarChart>

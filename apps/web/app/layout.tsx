@@ -1,16 +1,19 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
-import { QueryClientProvider } from '@/components/QueryClientProvider';
-import { AuthProvider } from '@/components/auth/AuthProvider';
-import { ThemeProvider } from '@/components/theme/ThemeProvider';
-import { GlobalNav } from '@/components/layout/GlobalNav';
-import { GlobalFooter } from '@/components/layout/GlobalFooter';
-import { JsonLd } from '@/components/JsonLd';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import './globals.css';
+
 import { Geist } from 'next/font/google';
-import { cn } from '@/lib/utils';
+import { cookies } from 'next/headers';
+
+import { AuthProvider } from '@/components/auth/AuthProvider';
+import { JsonLd } from '@/components/JsonLd';
+import { GlobalFooter } from '@/components/layout/GlobalFooter';
+import { GlobalNav } from '@/components/layout/GlobalNav';
+import { QueryClientProvider } from '@/components/QueryClientProvider';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
+
+import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 const geist = Geist({
   subsets: ['latin'],
@@ -18,44 +21,44 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
+  description:
+    'Create polls, collect anonymous or verified feedback, and analyze responses in real-time. Free online polling tool with live analytics dashboards, anti-spam protection, and shareable links.',
+  icons: {
+    apple: '/favicon.svg',
+    icon: '/favicon.svg',
+  },
   metadataBase: new URL('https://opinion.atharvdangedev.in'),
+  openGraph: {
+    description:
+      'Create polls, collect anonymous or verified feedback, and analyze responses in real-time. Free online polling tool with live analytics.',
+    images: [
+      {
+        alt: 'Opinion - Create & Share Polls',
+        height: 630,
+        url: '/og-image.png',
+        width: 1200,
+      },
+    ],
+    locale: 'en_US',
+    siteName: 'Opinion',
+    title: 'Opinion - Create & Share Polls',
+    type: 'website',
+    url: 'https://opinion.atharvdangedev.in',
+  },
+  robots: {
+    follow: true,
+    index: true,
+  },
   title: {
     default: 'Opinion - Create & Share Polls',
     template: '%s - Opinion',
   },
-  description:
-    'Create polls, collect anonymous or verified feedback, and analyze responses in real-time. Free online polling tool with live analytics dashboards, anti-spam protection, and shareable links.',
-  icons: {
-    icon: '/favicon.svg',
-    apple: '/favicon.svg',
-  },
-  openGraph: {
-    title: 'Opinion - Create & Share Polls',
-    description:
-      'Create polls, collect anonymous or verified feedback, and analyze responses in real-time. Free online polling tool with live analytics.',
-    url: 'https://opinion.atharvdangedev.in',
-    siteName: 'Opinion',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Opinion - Create & Share Polls',
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
   twitter: {
     card: 'summary_large_image',
-    title: 'Opinion - Create & Share Polls',
     description:
       'Create polls, collect anonymous or verified feedback, and analyze responses in real-time.',
     images: ['/og-image.png'],
-  },
-  robots: {
-    index: true,
-    follow: true,
+    title: 'Opinion - Create & Share Polls',
   },
 };
 
@@ -64,7 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const hasSession = cookieStore.has(process.env.SESSION_COOKIE_NAME || 'opinion_session');
 
   return (
-    <html lang="en" suppressHydrationWarning className={cn('font-sans', geist.variable)}>
+    <html className={cn('font-sans', geist.variable)} lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
           <AuthProvider hasSession={hasSession}>

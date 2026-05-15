@@ -1,43 +1,76 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script';
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 interface TurnstileWidgetProps {
-  onVerify: (token: string) => void;
   onExpire?: () => void;
+  onVerify: (token: string) => void;
 }
 
 declare global {
-  interface Window {
-    turnstile?: {
-      render: (
-        container: HTMLElement | null,
-        options: {
-          sitekey: string;
-          callback: (token: string) => void;
-          'expired-callback'?: () => void;
-          theme?: 'light' | 'dark' | 'auto';
-        },
-      ) => string;
-      reset: (widgetId: string) => void;
-      remove: (widgetId: string) => void;
+  var turnstile:
+    | {
+        remove: (widgetId: string) => void;
+        render: (
+          container: HTMLElement | null,
+          options: {
+            callback: (token: string) => void;
+            'expired-callback'?: () => void;
+            sitekey: string;
+            theme?: 'auto' | 'dark' | 'light';
+          },
+        ) => string;
+        reset: (widgetId: string) => void;
+      }
+    | undefined;
+}
+
+export function TurnstileWidget({ onExpire, onVerify }: TurnstileWidgetProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<null | string>(null);
+  const onVerifyRef = useRef(onVerify);
+  const onExpireRef = useRef(onExpire);
+
+  onVerifyRef.current = onVerify;
+  onExpireRef.current = onExpire;
+
+  useEffect(() => {
+    void loadTurnstileScript().then(() => {
+      const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+      if (!siteKey || !containerRef.current || !globalThis.turnstile) return;
+      if (widgetIdRef.current) return;
+
+      widgetIdRef.current = globalThis.turnstile.render(containerRef.current, {
+        callback: (token: string) => onVerifyRef.current(token),
+        'expired-callback': () => onExpireRef.current?.(),
+        sitekey: siteKey,
+      });
+    });
+
+    return () => {
+      if (widgetIdRef.current && globalThis.turnstile) {
+        globalThis.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
+      }
     };
-  }
+  }, []);
+
+  return <div ref={containerRef} />;
 }
 
 function loadTurnstileScript(): Promise<void> {
   return new Promise((resolve) => {
-    if (window.turnstile) {
+    if (globalThis.turnstile) {
       resolve();
       return;
     }
 
-    if (document.getElementById(TURNSTILE_SCRIPT_ID)) {
+    if (document.querySelector(`#${TURNSTILE_SCRIPT_ID}`)) {
       const check = setInterval(() => {
-        if (window.turnstile) {
+        if (globalThis.turnstile) {
           clearInterval(check);
           resolve();
         }
@@ -52,7 +85,7 @@ function loadTurnstileScript(): Promise<void> {
     script.defer = true;
 
     const check = setInterval(() => {
-      if (window.turnstile) {
+      if (globalThis.turnstile) {
         clearInterval(check);
         resolve();
       }
@@ -61,41 +94,8 @@ function loadTurnstileScript(): Promise<void> {
     setTimeout(() => {
       clearInterval(check);
       resolve();
-    }, 10000);
+    }, 10_000);
 
-    document.head.appendChild(script);
+    document.head.append(script);
   });
-}
-
-export function TurnstileWidget({ onVerify, onExpire }: TurnstileWidgetProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string | null>(null);
-  const onVerifyRef = useRef(onVerify);
-  const onExpireRef = useRef(onExpire);
-
-  onVerifyRef.current = onVerify;
-  onExpireRef.current = onExpire;
-
-  useEffect(() => {
-    void loadTurnstileScript().then(() => {
-      const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-      if (!siteKey || !containerRef.current || !window.turnstile) return;
-      if (widgetIdRef.current) return;
-
-      widgetIdRef.current = window.turnstile.render(containerRef.current, {
-        sitekey: siteKey,
-        callback: (token: string) => onVerifyRef.current(token),
-        'expired-callback': () => onExpireRef.current?.(),
-      });
-    });
-
-    return () => {
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
-      }
-    };
-  }, []);
-
-  return <div ref={containerRef} />;
 }

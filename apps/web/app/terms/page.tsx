@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
+
 import { Scale } from 'lucide-react';
+
 import { LegalPageLayout } from '@/components/layout/LegalPageLayout';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service',
   description:
     "Opinion's terms of service. By using Opinion you agree to these terms covering acceptable use, content ownership, and liability limitations.",
+  title: 'Terms of Service',
 };
 
 const sections = [
@@ -28,14 +30,14 @@ const prohibitedUses = [
 export default function TermsPage() {
   return (
     <LegalPageLayout
-      icon={<Scale className="size-5 text-primary" />}
       badge="Legal"
-      title="Terms of Service"
-      lastUpdated="May 2026"
       description="The rules of the road. Please read these terms carefully before using Opinion."
+      icon={<Scale className="size-5 text-primary" />}
+      lastUpdated="May 2026"
       sections={sections}
+      title="Terms of Service"
     >
-      <section id="acceptance" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="acceptance">
         <SectionHeader num="01" title="Acceptance of Terms" />
         <p className="text-base leading-relaxed text-foreground">
           By accessing and using Opinion, you acknowledge that you have read, understood, and agree
@@ -44,7 +46,7 @@ export default function TermsPage() {
         </p>
       </section>
 
-      <section id="acceptable-use" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="acceptable-use">
         <SectionHeader num="02" title="Acceptable Use" />
         <p className="mb-4 text-base leading-relaxed text-foreground">
           Opinion empowers you to create, distribute, and analyze polls. To maintain a safe
@@ -52,7 +54,7 @@ export default function TermsPage() {
         </p>
         <ul className="mb-6 space-y-3">
           {prohibitedUses.map((item) => (
-            <li key={item} className="flex items-start gap-3 text-base text-foreground">
+            <li className="flex items-start gap-3 text-base text-foreground" key={item}>
               <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-destructive" />
               {item}
             </li>
@@ -60,7 +62,7 @@ export default function TermsPage() {
         </ul>
       </section>
 
-      <section id="content" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="content">
         <SectionHeader num="03" title="User Content & Ownership" />
         <p className="mb-4 text-base leading-relaxed text-foreground">
           You retain full ownership of all polls, questions, and content you create on the platform.
@@ -76,7 +78,7 @@ export default function TermsPage() {
         </p>
       </section>
 
-      <section id="termination" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="termination">
         <SectionHeader num="04" title="Termination" />
         <p className="text-base leading-relaxed text-foreground">
           We reserve the right to suspend or terminate access to the platform for any user who
@@ -87,7 +89,7 @@ export default function TermsPage() {
         </p>
       </section>
 
-      <section id="liability" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="liability">
         <SectionHeader num="05" title="Limitation of Liability" />
         <p className="text-base leading-relaxed text-foreground">
           Opinion is provided on an <span className="italic">&ldquo;as is&rdquo;</span> and{' '}
@@ -98,7 +100,7 @@ export default function TermsPage() {
         </p>
       </section>
 
-      <section id="governing-law" className="mb-14 scroll-mt-28">
+      <section className="mb-14 scroll-mt-28" id="governing-law">
         <SectionHeader num="06" title="Governing Law" />
         <p className="text-base leading-relaxed text-foreground">
           These terms shall be governed by and construed in accordance with the laws of India. Any
@@ -107,7 +109,7 @@ export default function TermsPage() {
         </p>
       </section>
 
-      <section id="modifications" className="scroll-mt-28">
+      <section className="scroll-mt-28" id="modifications">
         <SectionHeader num="07" title="Modifications to Terms" />
         <p className="text-base leading-relaxed text-foreground">
           We reserve the right to update or modify these Terms of Service at any time. Significant

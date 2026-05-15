@@ -1,16 +1,17 @@
 'use client';
 
-import { use, useEffect, useState, useRef } from 'react';
-import { ShieldCheck, RotateCcw, ArrowLeft } from 'lucide-react';
-import { TurnstileWidget } from '@/components/TurnstileWidget';
-import { api } from '@/lib/api';
-import { Button } from '@/components/ui/button';
+import { ArrowLeft, RotateCcw, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import { use, useEffect, useRef, useState } from 'react';
+
+import { TurnstileWidget } from '@/components/TurnstileWidget';
+import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
 
 export default function VerifyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
-  const [state, setState] = useState<'waiting' | 'verifying' | 'done' | 'error'>('waiting');
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<'done' | 'error' | 'verifying' | 'waiting'>('waiting');
+  const [error, setError] = useState<null | string>(null);
   const redirectingRef = useRef(false);
 
   useEffect(() => {
@@ -27,13 +28,15 @@ export default function VerifyPage({ params }: { params: Promise<{ slug: string 
       setState('done');
       redirectingRef.current = true;
       setTimeout(() => {
-        window.location.href = `/poll/${slug}`;
+        globalThis.location.href = `/poll/${slug}`;
       }, 800);
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } }; message?: string };
+    } catch (error_: unknown) {
+      const error = error_ as { message?: string; response?: { data?: { message?: string } } };
       setState('error');
       setError(
-        error?.response?.data?.message || error?.message || 'Verification failed. Please try again.',
+        error?.response?.data?.message ||
+          error?.message ||
+          'Verification failed. Please try again.',
       );
     }
   };
@@ -72,7 +75,11 @@ export default function VerifyPage({ params }: { params: Promise<{ slug: string 
 
         {state === 'waiting' && (
           <div className="flex justify-center">
-              <TurnstileWidget onVerify={(token) => { void handleVerify(token); }} />
+            <TurnstileWidget
+              onVerify={(token) => {
+                void handleVerify(token);
+              }}
+            />
           </div>
         )}
 
@@ -88,15 +95,19 @@ export default function VerifyPage({ params }: { params: Promise<{ slug: string 
         {state === 'error' && (
           <div className="space-y-4">
             <div className="flex justify-center">
-            <TurnstileWidget onVerify={(token) => { void handleVerify(token); }} />
+              <TurnstileWidget
+                onVerify={(token) => {
+                  void handleVerify(token);
+                }}
+              />
             </div>
             <Button
-              variant="ghost"
-              size="sm"
               onClick={() => {
                 setState('waiting');
                 setError(null);
               }}
+              size="sm"
+              variant="ghost"
             >
               <RotateCcw className="mr-2 size-3.5" />
               Try again
@@ -106,7 +117,7 @@ export default function VerifyPage({ params }: { params: Promise<{ slug: string 
 
         {state === 'done' && (
           <p className="text-xs text-muted-foreground">
-            <Link href={`/poll/${slug}`} className="underline-offset-2 hover:underline">
+            <Link className="underline-offset-2 hover:underline" href={`/poll/${slug}`}>
               Not redirecting? Click here.
             </Link>
           </p>
@@ -114,8 +125,8 @@ export default function VerifyPage({ params }: { params: Promise<{ slug: string 
 
         <div className="mt-8 border-t border-border/30 pt-6">
           <Link
-            href="/"
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            href="/"
           >
             <ArrowLeft className="size-3" />
             Back to home

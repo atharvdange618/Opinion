@@ -1,26 +1,27 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { BarChart3, ExternalLink, Pencil, Plus, Users } from 'lucide-react';
 import Link from 'next/link';
-import { api } from '@/lib/api';
+import { useEffect, useMemo } from 'react';
+
+import { EmptyPolls } from '@/components/illustrations/EmptyPolls';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EmptyPolls } from '@/components/illustrations/EmptyPolls';
-import { Plus, BarChart3, Pencil, Users, ExternalLink } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { api } from '@/lib/api';
 
 interface PollSummary {
   _id: string;
-  title: string;
-  slug: string;
-  status: string;
-  responseMode: string;
+  createdAt: string;
   expiresAt: string;
   responseCount: number;
-  createdAt: string;
+  responseMode: string;
+  slug: string;
+  status: string;
+  title: string;
 }
 
 export default function DashboardPage() {
@@ -29,19 +30,19 @@ export default function DashboardPage() {
   }, []);
 
   const { data: polls, isLoading } = useQuery<PollSummary[]>({
-    queryKey: ['my-polls'],
     queryFn: async () => {
       const { data } = await api.get('/polls');
       return data;
     },
+    queryKey: ['my-polls'],
   });
 
   const stats = useMemo(() => {
-    if (!polls) return { total: 0, responses: 0, active: 0 };
+    if (!polls) return { active: 0, responses: 0, total: 0 };
     return {
-      total: polls.length,
-      responses: polls.reduce((acc, p) => acc + p.responseCount, 0),
       active: polls.filter((p) => p.status === 'active').length,
+      responses: polls.reduce((acc, p) => acc + p.responseCount, 0),
+      total: polls.length,
     };
   }, [polls]);
 
@@ -54,7 +55,7 @@ export default function DashboardPage() {
             Manage your polls and track feedback.
           </p>
         </div>
-        <Button size="lg" asChild>
+        <Button asChild size="lg">
           <Link href="/polls/create">
             <Plus className="mr-2 size-5" />
             Create Poll
@@ -100,7 +101,7 @@ export default function DashboardPage() {
       {isLoading ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="border-border/60 bg-card">
+            <Card className="border-border/60 bg-card" key={i}>
               <CardHeader>
                 <Skeleton className="mb-2 h-6 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
@@ -123,7 +124,7 @@ export default function DashboardPage() {
                 Create your first poll to start collecting feedback.
               </CardDescription>
             </div>
-            <Button size="lg" className="mt-2" asChild>
+            <Button asChild className="mt-2" size="lg">
               <Link href="/polls/create">
                 <Plus className="mr-2 size-5" />
                 Create your first poll
@@ -135,8 +136,8 @@ export default function DashboardPage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {polls?.map((poll) => (
             <Card
-              key={poll._id}
               className="group relative flex flex-col justify-between border-border/60 bg-card"
+              key={poll._id}
             >
               <CardHeader className="pb-3">
                 <div className="mb-3 flex items-start justify-between gap-4">
@@ -161,7 +162,7 @@ export default function DashboardPage() {
 
               <CardContent className="mt-auto border-t border-border/40 pt-4">
                 <div className="flex items-center gap-2">
-                  <Button variant="default" size="sm" className="flex-1" asChild>
+                  <Button asChild className="flex-1" size="sm" variant="default">
                     <Link href={`/polls/${poll._id}/analytics`}>
                       <BarChart3 className="mr-1.5 size-3.5" />
                       Analytics
@@ -169,7 +170,7 @@ export default function DashboardPage() {
                   </Button>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="sm" asChild>
+                      <Button asChild size="sm" variant="ghost">
                         <Link href={`/polls/${poll._id}/edit`}>
                           <Pencil className="size-3.5" />
                         </Link>
@@ -179,7 +180,7 @@ export default function DashboardPage() {
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="sm" asChild>
+                      <Button asChild size="sm" variant="ghost">
                         <Link href={`/poll/${poll.slug}`} target="_blank">
                           <ExternalLink className="size-3.5" />
                         </Link>

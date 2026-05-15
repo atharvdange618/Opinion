@@ -1,30 +1,31 @@
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+
 import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+
+interface LegalPageLayoutProps {
+  badge: string;
+  children: ReactNode;
+  description: string;
+  icon: ReactNode;
+  lastUpdated: string;
+  sections: Section[];
+  title: string;
+}
 
 interface Section {
   id: string;
   label: string;
 }
 
-interface LegalPageLayoutProps {
-  icon: ReactNode;
-  badge: string;
-  title: string;
-  lastUpdated: string;
-  description: string;
-  sections: Section[];
-  children: ReactNode;
-}
-
 export function LegalPageLayout({
-  icon,
   badge,
-  title,
-  lastUpdated,
-  description,
-  sections,
   children,
+  description,
+  icon,
+  lastUpdated,
+  sections,
+  title,
 }: LegalPageLayoutProps) {
   return (
     <div className="relative overflow-hidden">
@@ -35,8 +36,8 @@ export function LegalPageLayout({
 
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <Link
-          href="/"
           className="group mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          href="/"
         >
           <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
           Back to home
@@ -68,8 +69,8 @@ export function LegalPageLayout({
                 {sections.map((section) => (
                   <li key={section.id}>
                     <a
-                      href={`#${section.id}`}
                       className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-all hover:bg-muted/50 hover:text-foreground"
+                      href={`#${section.id}`}
                     >
                       <span className="size-1.5 rounded-full bg-muted-foreground/30 transition-colors group-hover:bg-primary" />
                       {section.label}

@@ -1,35 +1,36 @@
 'use client';
 
+import { BookOpen, Calendar, Users } from 'lucide-react';
+
 import { useInView } from '@/hooks/useInView';
 import { cn } from '@/lib/utils';
-import { Users, BookOpen, Calendar } from 'lucide-react';
 
 const cases = [
   {
-    icon: Users,
-    title: 'Team retrospectives',
     description:
       'Run anonymous sprint retros where everyone speaks freely. Get honest, actionable feedback without the awkward silence.',
+    icon: Users,
+    title: 'Team retrospectives',
   },
   {
-    icon: BookOpen,
-    title: 'Classrooms & workshops',
     description:
       "Quiz students, collect Q&A, and gauge understanding mid-session. See what lands and what doesn't, instantly.",
+    icon: BookOpen,
+    title: 'Classrooms & workshops',
   },
   {
-    icon: Calendar,
-    title: 'Events & communities',
     description:
       'Run live polls at meetups, conferences, or community discussions. Share a link and watch the room respond in real time.',
+    icon: Calendar,
+    title: 'Events & communities',
   },
 ];
 
 export function UseCases() {
-  const { ref, inView } = useInView({ threshold: 0.1 });
+  const { inView, ref } = useInView({ threshold: 0.1 });
 
   return (
-    <section ref={ref} className="px-4 py-24 sm:py-32">
+    <section className="px-4 py-24 sm:py-32" ref={ref}>
       <div className="mx-auto max-w-6xl">
         <div
           className={cn(
@@ -52,12 +53,12 @@ export function UseCases() {
         <div className="grid gap-5 md:grid-cols-3">
           {cases.map((item, i) => (
             <div
-              key={item.title}
-              style={{ transitionDelay: `${i * 200}ms` }}
               className={cn(
                 'group rounded-2xl border border-border/30 bg-card p-8 transition-all duration-700 ease-out hover:border-border/60 hover:shadow-sm sm:p-10',
                 inView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
               )}
+              key={item.title}
+              style={{ transitionDelay: `${i * 200}ms` }}
             >
               <div className="mb-5 flex size-12 items-center justify-center rounded-xl bg-primary/5 text-primary ring-1 ring-primary/15 transition-colors group-hover:bg-primary/10 group-hover:ring-primary/25">
                 <item.icon className="size-6" />

@@ -1,19 +1,20 @@
 'use client';
 
 import { createContext, use, useEffect, useState } from 'react';
-import { api } from '@/lib/api';
 
-interface User {
-  sub: string;
-  email: string;
-  name: string;
-  picture?: string;
-}
+import { api } from '@/lib/api';
 
 interface AuthContextValue {
   isLoaded: boolean;
   isSignedIn: boolean;
-  user: User | null;
+  user: null | User;
+}
+
+interface User {
+  email: string;
+  name: string;
+  picture?: string;
+  sub: string;
 }
 
 const AuthContext = createContext<AuthContextValue>({

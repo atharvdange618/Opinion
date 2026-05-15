@@ -1,14 +1,15 @@
 'use client';
 
-import Link from 'next/link';
-import { useInView } from '@/hooks/useInView';
-import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
+import { useInView } from '@/hooks/useInView';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export function AnimatedCTA({ hasSession }: { hasSession: boolean }) {
-  const { ref, inView } = useInView({ threshold: 0.3 });
+  const { inView, ref } = useInView({ threshold: 0.3 });
 
   return (
     <section className="relative overflow-hidden px-4 py-20" ref={ref}>
@@ -23,7 +24,7 @@ export function AnimatedCTA({ hasSession }: { hasSession: boolean }) {
           Create your first poll in seconds. No credit card required.
         </p>
         <div className="mt-8">
-          <Button size="lg" asChild>
+          <Button asChild size="lg">
             <Link
               href={
                 hasSession
